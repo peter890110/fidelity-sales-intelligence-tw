@@ -113,11 +113,11 @@
   }
 
   var metricDefinitions = [
-    {key:"y1",label:"一年績效",direction:"high",hint:"高較佳",format:function (v) { return Number(v).toFixed(2) + "%"; }},
-    {key:"risk",label:"風險",direction:"low",hint:"年化標準差｜低較佳",format:function (v) { return Number(v).toFixed(2) + "%"; }},
-    {key:"distribution",label:"配息",direction:"high",neutralRange:0.25,hint:"最新年化配息率｜高不等於佳",format:function (v) { return Number(v).toFixed(2) + "%"; }},
-    {key:"expense",label:"費用率",direction:"low",hint:"最高經理費｜低較佳",format:function (v) { return Number(v).toFixed(2) + "%"; }},
-    {key:"sharpe",label:"夏普值",direction:"high",hint:"高較佳",format:function (v) { return Number(v).toFixed(2); }}
+    {key:"y1",label:"一年績效",direction:"high",hint:"越外＝績效較高",format:function (v) { return Number(v).toFixed(2) + "%"; }},
+    {key:"risk",label:"風險",direction:"high",hint:"越外＝波動較高｜低較佳",format:function (v) { return Number(v).toFixed(2) + "%"; }},
+    {key:"distribution",label:"配息",direction:"high",hint:"越外＝配息率較高｜高不等於佳",format:function (v) { return Number(v).toFixed(2) + "%"; }},
+    {key:"expense",label:"費用率",direction:"high",hint:"越外＝費用較高｜低較佳",format:function (v) { return Number(v).toFixed(2) + "%"; }},
+    {key:"sharpe",label:"夏普值",direction:"high",hint:"越外＝風險效率較高",format:function (v) { return Number(v).toFixed(2); }}
   ];
 
   function hasCompleteMetrics(item) {
@@ -134,14 +134,11 @@
     var universe = metricUniverse(fund);
     return metricDefinitions.map(function (definition) {
       var values = universe.map(function (entry) { return entry.metrics[definition.key]; });
-      var range = Math.max.apply(Math, values) - Math.min.apply(Math, values);
-      if (definition.neutralRange && range < definition.neutralRange) return 0.5;
       var mean = values.reduce(function (sum, value) { return sum + value; }, 0) / values.length;
       var variance = values.reduce(function (sum, value) { return sum + Math.pow(value - mean, 2); }, 0) / values.length;
       var deviation = Math.sqrt(variance);
       if (!deviation) return 0.5;
       var z = (item.metrics[definition.key] - mean) / deviation;
-      if (definition.direction === "low") z = -z;
       // Z-score is compressed into a 30–70 display band so a small peer pool does
       // not turn the lowest and highest observations into visual zeroes or full marks.
       return 0.5 + 0.2 * Math.tanh(z / 1.35);
@@ -176,7 +173,11 @@
       }).join("");
     };
     var labels = metricDefinitions.map(function (definition, index) {
-      return '<div class="radarAxis a' + (index + 1) + '"><b>' + definition.label + '</b><span class="fidelityStatus">' + definition.format(fund.metrics[definition.key]) + '</span><span class="peerStatus ok">' + definition.format(peer.metrics[definition.key]) + '</span><small>' + definition.hint + '</small><em>同類平均＝50</em></div>';
+      var fundRaw = fund.metrics[definition.key];
+      var peerRaw = peer.metrics[definition.key];
+      var fundRank = fundRaw === peerRaw ? '相同' : fundRaw > peerRaw ? '較高' : '較低';
+      var peerRank = fundRaw === peerRaw ? '相同' : peerRaw > fundRaw ? '較高' : '較低';
+      return '<div class="radarAxis a' + (index + 1) + '"><b>' + definition.label + '</b><span class="fidelityStatus">' + definition.format(fundRaw) + '<u>' + fundRank + '</u></span><span class="peerStatus ok">' + definition.format(peerRaw) + '<u>' + peerRank + '</u></span><small>' + definition.hint + '</small><em>同類平均＝50</em></div>';
     }).join("");
     var rows = metricDefinitions.map(function (definition) {
       var fundNote = definition.key === "distribution" ? '<small>' + fund.metrics.distributionNote + '</small>' : '';
@@ -187,7 +188,7 @@
       '<div class="radarWrap"><svg class="radarPlot" viewBox="0 0 360 332" role="img" aria-label="' + escapeHtml(cleanName(fund.name) + "與" + peer.name + "的一年績效、風險、配息、費用率與夏普值比較圖") + '">' +
       '<g class="radarGrid"><polygon points="' + radarPoints([1,1,1,1,1],116) + '"></polygon><polygon points="' + radarPoints([.67,.67,.67,.67,.67],116) + '"></polygon><polygon points="' + radarPoints([.34,.34,.34,.34,.34],116) + '"></polygon>' + axisLines + '</g>' +
       '<polygon class="fidelityShape" points="' + radarPoints(fidelityValues,116) + '"></polygon><polygon class="peerShape" points="' + radarPoints(peerValues,116) + '"></polygon>' + dots(fidelityValues,"fidelityDot") + dots(peerValues,"peerDot") + '</svg>' + labels + '</div>' +
-      '<p class="radarReading"><b>讀圖：</b>五項原始數字先在同類基金池做 Z-score 標準化，50 代表同類平均；優於同類往外、低於同類往內，顯示區間收斂在 30–70，避免小樣本造成滿分或零分。配息差距低於 0.25 個百分點時視為中性，不放大無實質意義的差距。這是比較指數，不是基金評分。</p>' +
+      '<p class="radarReading"><b>讀圖：</b>雷達圖只表達數值大小：五個指標都是數值越高越外，並在數字旁直接標出「較高／較低」。原始數字經同類基金池 Z-score 標準化，50 代表同類平均，顯示區間收斂在 30–70。風險與費用雖然越高越外，但通常越低較佳；配息率較高也不等於總報酬較佳。這是比較指數，不是基金評分。</p>' +
       '<div class="metricMatrix"><div class="metricRow metricHead"><div>原始指標</div><strong>' + cleanName(fund.name) + '</strong><strong>' + peer.name + '</strong></div>' + rows + '<p>績效／風險／Sharpe 資料日：' + fund.metrics.asOf + '、' + peer.metrics.asOf + '。配息資料日依各級別最近紀錄；費用率採 MoneyDJ 揭露的最高經理費。</p></div>';
   }
 
