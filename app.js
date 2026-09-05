@@ -112,6 +112,71 @@
     return "+" + Number(value).toFixed(2) + "%";
   }
 
+  function peerComparability(fund, peer) {
+    var scopeExceptions = {
+      bond:["聯博－美國收益基金 A2 美元"],
+      momentum:["安聯收益成長基金 AT 美元"],
+      income:["安聯收益成長基金 AT 美元"],
+      asia:["施羅德新興亞洲 A 累積美元"],
+      tech:["摩根美國科技基金 A 美元累計"]
+    };
+    var sameCurrency = {
+      japan:["野村日本策略價值基金 T 日圓類股"],
+      bond:["聯博－美國收益基金 A2 美元"],
+      momentum:["群益潛力收益多重資產基金 NA 美元","PIMCO 收益增長基金 M 級累積","安聯收益成長基金 AT 美元","聯博全球多元收益基金 A 美元","富達全球多元收益基金 A 累計美元","施羅德環球多元收益 A 累積美元","貝萊德環球資產配置基金 A2 美元"],
+      income:["摩根環球入息基金 A 美元累計","貝萊德多元資產收益基金 A2 美元","安聯收益成長基金 AT 美元"],
+      sustainable:["貝萊德智慧數據收益成長基金 B2 美元"],
+      tech:[],
+      asia:["瀚亞投資－亞洲股票基金 A 美元","施羅德新興亞洲 A 累積美元"],
+      taiwan:["安聯台灣科技基金","安聯台灣大壩基金","路博邁台灣 5G 股票基金","野村台灣運籌基金","元大多多基金 A 不配息","統一奔騰基金"],
+      em:["摩根環球新興市場機會基金 A 美元","施羅德新興市場 A 累積美元"]
+    };
+    var exceptions = scopeExceptions[fund.id] || [];
+    var currencyPeers = sameCurrency[fund.id] || [];
+    return [
+      {label:"資產類別",fidelity:true,peer:true},
+      {label:"投資範圍",fidelity:true,peer:exceptions.indexOf(peer.name) === -1},
+      {label:"策略同類",fidelity:true,peer:peer.type === "直接同類"},
+      {label:"同幣別級別",fidelity:true,peer:currencyPeers.indexOf(peer.name) !== -1},
+      {label:"同日績效",fidelity:true,peer:false}
+    ];
+  }
+
+  function radarPoints(values, radius) {
+    var cx = 180;
+    var cy = 166;
+    return values.map(function (value, index) {
+      var angle = -Math.PI / 2 + index * Math.PI * 2 / values.length;
+      var r = radius * value;
+      return (cx + Math.cos(angle) * r).toFixed(1) + "," + (cy + Math.sin(angle) * r).toFixed(1);
+    }).join(" ");
+  }
+
+  function radarChart(fund, peer) {
+    var axes = peerComparability(fund, peer);
+    var fidelityValues = axes.map(function () { return 1; });
+    var peerValues = axes.map(function (axis) { return axis.peer ? 1 : 0.08; });
+    var axisLines = axes.map(function (_, index) {
+      var angle = -Math.PI / 2 + index * Math.PI * 2 / axes.length;
+      return '<line x1="180" y1="166" x2="' + (180 + Math.cos(angle) * 116).toFixed(1) + '" y2="' + (166 + Math.sin(angle) * 116).toFixed(1) + '"></line>';
+    }).join("");
+    var dots = function (values, className) {
+      return values.map(function (value, index) {
+        var angle = -Math.PI / 2 + index * Math.PI * 2 / values.length;
+        var r = 116 * value;
+        return '<circle class="' + className + '" cx="' + (180 + Math.cos(angle) * r).toFixed(1) + '" cy="' + (166 + Math.sin(angle) * r).toFixed(1) + '" r="4"></circle>';
+      }).join("");
+    };
+    var labels = axes.map(function (axis, index) {
+      return '<div class="radarAxis a' + (index + 1) + '"><b>' + axis.label + '</b><span class="fidelityStatus">富達 ✓</span><span class="peerStatus ' + (axis.peer ? "ok" : "missing") + '">競品 ' + (axis.peer ? "✓" : "—") + '</span></div>';
+    }).join("");
+    return '<div class="radarLegend"><span><i class="fidelityKey"></i>' + cleanName(fund.name) + '</span><span><i class="peerKey"></i>' + peer.name + '</span></div>' +
+      '<div class="radarWrap"><svg class="radarPlot" viewBox="0 0 360 332" role="img" aria-label="' + escapeHtml(cleanName(fund.name) + "與" + peer.name + "的五維可比條件重疊圖") + '">' +
+      '<g class="radarGrid"><polygon points="' + radarPoints([1,1,1,1,1],116) + '"></polygon><polygon points="' + radarPoints([.67,.67,.67,.67,.67],116) + '"></polygon><polygon points="' + radarPoints([.34,.34,.34,.34,.34],116) + '"></polygon>' + axisLines + '</g>' +
+      '<polygon class="fidelityShape" points="' + radarPoints(fidelityValues,116) + '"></polygon><polygon class="peerShape" points="' + radarPoints(peerValues,116) + '"></polygon>' + dots(fidelityValues,"fidelityDot") + dots(peerValues,"peerDot") + '</svg>' + labels + '</div>' +
+      '<p class="radarReading"><b>讀圖：</b>兩色越重疊，代表該項越能公平比較；「—」表示資料條件尚未對齊，不代表基金表現較差。</p>';
+  }
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, function (char) {
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
@@ -153,7 +218,7 @@
     return '<div class="page">' + title("COMPETITOR INTELLIGENCE", "競品決策室", "先確認可比性，再談績效；沒有同日口徑，就不下勝負結論。") +
       '<div class="selectors"><label>富達核心基金<select id="fundSelect">' + fundOptions + '</select></label><b>VS</b><label>競品基金<select id="peerSelect">' + peerOptions + '</select></label></div>' +
       '<section class="compareLead"><div><small>' + peer.type + '</small><h2>' + cleanName(fund.name) + '<br><span>對比 ' + peer.name + '</span></h2><p>' + peer.note + '</p><button data-copy="' + escapeHtml(opening) + '">複製顧問式開場</button></div><div class="verified"><small>FIDELITY VERIFIED</small><b>' + pct(fund.y1) + '</b><span>近一年累計 · ' + fund.perfDate + '</span><b>' + fund.nav + '</b><span>最新淨值 · ' + fund.navDate + '</span></div></section>' +
-      '<div class="compareGrid"><section class="card"><div class="cardHead"><div><small>COMPARABILITY MAP</small><h2>五維可比性檢查</h2></div><span>方法論，不是評分</span></div><div class="pentagon"><div class="pGrid one"></div><div class="pGrid two"></div><div class="pGrid three"></div><div class="pFill"></div><b class="l1">資產類別 ✓</b><b class="l2">投資範圍 ✓</b><b class="l3">策略接近 ✓</b><b class="l4">同日績效 —</b><b class="l5">同幣別級別 —</b></div><p class="method">前三項可比較；同日績效與同幣別級別尚未取得，因此不顯示競品報酬或宣稱勝負。</p></section>' +
+      '<div class="compareGrid"><section class="card radarCard"><div class="cardHead"><div><small>DUAL FUND RADAR</small><h2>雙基金五維重疊比較</h2></div><span>實線＝已對齊</span></div>' + radarChart(fund, peer) + '<p class="method">此圖比較的是產品與資料口徑是否對齊。要判斷誰的績效更好，仍須取得同日、同幣別、同配息政策的公開數據後再比較。</p></section>' +
       '<section class="card evidence"><small>SOURCE AUDIT</small><h2>證據與口徑</h2><dl><div><dt>富達級別</dt><dd>' + fund.share + '</dd></div><div><dt>淨值</dt><dd>' + fund.nav + '<small>' + fund.navDate + '</small></dd></div><div><dt>績效</dt><dd>1Y ' + pct(fund.y1) + ' / 3Y ' + pct(fund.y3) + '<small>' + fund.perfDate + '</small></dd></div><div><dt>競品數字</dt><dd class="pending">未取得同日同幣別，不顯示</dd></div></dl><a href="' + fund.source + '">富達資料來源 ↗</a><a class="secondary" href="' + peer.source + '">競品資料來源 ↗</a></section></div>' +
       '<section class="sectionHead"><div><small>PEER UNIVERSE</small><h2>' + cleanName(fund.name) + '競品池</h2></div><span>' + list.length + ' 檔</span></section><div class="peerGrid">' + peerCards + '</div></div>';
   }
