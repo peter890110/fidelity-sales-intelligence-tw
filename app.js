@@ -1,0 +1,321 @@
+(function () {
+  "use strict";
+
+  var fidelitySource = "https://www.fidelity.com.tw/fund-and-service/fundui/funds/?grouping=%24fundRangeCode&intcmp=menu_ws_fund-and-service_sep_2022";
+  var funds = [
+    {id:"japan",name:"富達基金－日本價值基金",en:"Fidelity Japan Value Fund",share:"A2股日圓",asset:"股票型",theme:"日本價值",risk:"RR4",nav:"11,609.9000 日圓",navDate:"2026/08/28",y1:37.82,y3:53.09,perfDate:"2026/07/31",thesis:"公司治理改革、資本效率提升與價值重估構成長期選股脈絡。",role:"降低純科技成長曝險，補進日本企業改革紅利",source:fidelitySource},
+    {id:"bond",name:"富達基金－全球優質債券基金",en:"Fidelity Global Income Fund",share:"A股累計美元",asset:"債券型",theme:"全球複合債",risk:"RR3",nav:"14.9500 美元",navDate:"2026/08/28",y1:3.91,y3:11.97,perfDate:"2026/07/31",thesis:"以全球配置、信用研究與存續期間管理，在收益與防禦之間取得平衡。",role:"為高波動股票部位增加收益與緩衝來源",source:fidelitySource},
+    {id:"momentum",name:"富達基金－全球動能多元基金",en:"Fidelity Global Multi Asset Dynamic Fund",share:"A股累計美元",asset:"多重資產",theme:"動態配置",risk:"RR3",nav:"23.0900 美元",navDate:"2026/08/28",y1:23.47,y3:32.29,perfDate:"2026/07/31",thesis:"主動調整股票、債券及其他資產，因應景氣與市場動能轉換。",role:"用單一部位取得跨資產調整能力",source:fidelitySource},
+    {id:"income",name:"富達基金－全球多重資產收益基金",en:"Fidelity Global Multi Asset Income Fund",share:"A股累計美元",asset:"多重資產",theme:"收益導向",risk:"RR3",nav:"16.0000 美元",navDate:"2026/08/28",y1:10.73,y3:17.19,perfDate:"2026/07/31",thesis:"跨資產尋找多元收益來源，並兼顧資本增值與下檔管理。",role:"作為收益型組合的跨資產核心",source:fidelitySource},
+    {id:"sustainable",name:"富達基金－永續發展全球存股優勢基金",en:"Fidelity Global Dividend Plus Fund",share:"A股累計美元",asset:"股票型",theme:"全球股息／永續",risk:"RR4",nav:"15.4800 美元",navDate:"2026/08/28",y1:15.56,y3:33.60,perfDate:"2026/07/31",thesis:"聚焦具品質、股息韌性與永續特徵的全球企業。",role:"補足科技集中之外的品質股息來源",source:fidelitySource},
+    {id:"tech",name:"富達基金－全球科技基金",en:"Fidelity Global Technology Fund",share:"A股歐元",asset:"股票型",theme:"全球科技",risk:"RR4",nav:"95.8500 歐元",navDate:"2026/08/28",y1:20.02,y3:32.78,perfDate:"2026/07/31",thesis:"透過全球科技選股參與 AI、軟體、半導體與數位轉型。",role:"取得全球科技創新與產業擴散機會",source:fidelitySource},
+    {id:"asia",name:"富達基金－亞洲成長趨勢基金",en:"Fidelity Asian Special Situations Fund",share:"A股累計美元",asset:"股票型",theme:"亞洲成長",risk:"RR5",nav:"52.8400 美元",navDate:"2026/08/28",y1:50.34,y3:72.32,perfDate:"2026/07/31",thesis:"從亞洲供應鏈、消費升級與數位化中尋找結構性成長。",role:"擴大美股之外的亞洲成長來源",source:fidelitySource},
+    {id:"taiwan",name:"富達台灣成長基金",en:"Fidelity Taiwan Growth Fund",share:"A股累積型（新臺幣）",asset:"股票型",theme:"台股成長",risk:"RR5",nav:"234.6400 新臺幣",navDate:"2026/09/04",y1:132.77,y3:157.79,perfDate:"2026/07/31",thesis:"主動選擇台灣具成長性與競爭力的企業，掌握產業升級。",role:"聚焦台灣成長企業與 AI 供應鏈機會",source:"https://www.moneydj.com/FUNDDJ/YA/YP010000_ACFD02.DJHTM"},
+    {id:"em",name:"富達基金－新興市場基金",en:"Fidelity Emerging Markets Fund",share:"A股美元",asset:"股票型",theme:"新興市場",risk:"RR5",nav:"51.8100 美元",navDate:"2026/08/28",y1:44.66,y3:61.64,perfDate:"2026/07/31",thesis:"以在地研究辨識國家、產業與企業差異，而非將新興市場視為單一交易。",role:"增加成熟市場之外的結構性成長來源",source:fidelitySource}
+  ];
+
+  var peers = {
+    japan:[
+      {name:"富蘭克林坦伯頓日本基金美元 A（ACC）",type:"鄰近策略",source:"https://www.franklin.com.tw/",note:"日本股票策略但為美元級別；適合比較持股與風格，不宜直接比報酬。"},
+      {name:"野村日本策略價值基金 T 日圓類股",type:"直接同類",source:"https://www.moneydj.com/funddj/ya/yp081002.djhtm?D=1&a=f2",note:"日本價值股票且為日圓級別；適合進一步做同幣別績效核對。"},
+      {name:"瀚亞投資－日本動力股票基金 A（美元）",type:"鄰近策略",source:"https://chbfund.moneydj.com/w/wb/wb01_IOFA3-3641.djhtm",note:"同屬日本股票，但為美元級別；比較報酬前必須調整幣別口徑。"}
+    ],
+    bond:[
+      {name:"路博邁全球策略收益債券基金 T 累積型",type:"鄰近策略",source:"https://www.moneydj.com/funddj/ya/yp010000.djhtm?a=ACNB108",note:"策略收益債，信用風險與投資等級占比須另行核對。"},
+      {name:"聯博－美國收益基金 A2 美元",type:"鄰近策略",source:"https://dj2.moneydj.com/w/wb/wb01_ALZ10.djhtm",note:"以美元債券為主，投資範圍並非完全相同。"},
+      {name:"PIMCO 多元收益債券基金",type:"鄰近策略",source:"https://www.pimco.com/tw/zh",note:"多元收益取向；應先確認實際申購級別與非投資等級曝險。"}
+    ],
+    momentum:[
+      {name:"群益潛力收益多重資產基金 NA 美元",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACCA210",note:"多重資產但偏收益取向，與動能配置目標不同。"},
+      {name:"PIMCO 收益增長基金 M 級累積",type:"鄰近策略",source:"https://m.moneydj.com/b3.aspx?a=PIMB8",note:"收益增長取向，可比較資產配置但非完全同策略。"},
+      {name:"安聯收益成長基金 AT 美元",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yp/yp011001.djhtm?a=TLZ63",note:"美國平衡型且含非投資級債，區域範圍不同。"},
+      {name:"摩根多重資產收益基金",type:"鄰近策略",source:"https://m.moneydj.com/B5.aspx?a=jfzk3",note:"收益導向；配息級別應以總報酬比較。"},
+      {name:"聯博全球多元收益基金 A 美元",type:"直接同類",source:"https://www.moneydj.com/funddj/yp/yp011001.djhtm?a=ALBG2",note:"全球多重資產，可比較配置框架與風險目標。"},
+      {name:"富達全球多元收益基金 A 累計美元",type:"直接同類",source:fidelitySource,note:"同品牌新策略，成立期間較短，長期績效資料有限。"},
+      {name:"施羅德環球多元收益 A 累積美元",type:"直接同類",source:"https://www.moneydj.com/funddj/yp/yp902.djhtm?a=PYZW6",note:"全球平衡型美元累積級別。"},
+      {name:"貝萊德環球資產配置基金 A2 美元",type:"直接同類",source:"https://www.moneydj.com/funddj/yp/yp012001.djhtm?a=SHZB2",note:"全球動態配置，可比較風險預算與資產調整。"}
+    ],
+    income:[
+      {name:"摩根環球入息基金 A 美元累計",type:"直接同類",source:"https://www.moneydj.com/funddj/",note:"全球多重資產收益策略。"},
+      {name:"貝萊德多元資產收益基金 A2 美元",type:"直接同類",source:"https://www.moneydj.com/funddj/",note:"同屬多重資產收益類別，需核對配息與累積級別。"},
+      {name:"安聯收益成長基金 AT 美元",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yp/yp011001.djhtm?a=TLZ63",note:"美國平衡型，與全球收益策略的範圍不同。"}
+    ],
+    sustainable:[
+      {name:"貝萊德智慧數據收益成長基金 B2 美元",type:"鄰近策略",source:"https://dj2.moneydj.com/w/wb/wb01_SHZA57.djhtm",note:"系統化收益與成長策略，並非純全球股息股票。"}
+    ],
+    tech:[
+      {name:"貝萊德世界科技基金 A2 美元",type:"直接同類",source:"https://www.moneydj.com/funddj/yp/yp020001.djhtm?a=47&ff=1",note:"全球科技股票直接競品；須先統一歐元與美元級別。"},
+      {name:"摩根美國科技基金 A 美元累計",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yp/yp013001.djhtm?a=JFZG4",note:"美國科技取向，地區範圍較集中。"},
+      {name:"富蘭克林科技基金美元 A（ACC）",type:"直接同類",source:"https://pscnetsecrwd.moneydj.com/w/wb/wb01.djhtm?a=FLZ80-T08036TN",note:"全球科技股票競品。"}
+    ],
+    asia:[
+      {name:"瀚亞投資－亞洲股票基金 A 美元",type:"直接同類",source:"https://www.moneydj.com/funddj/ya/yp302001.djhtm?a=0&b=22&c=D&ff=1",note:"亞洲股票美元級別，可比較國家配置與選股來源。"},
+      {name:"施羅德新興亞洲 A 累積美元",type:"直接同類",source:"https://www.moneydj.com/funddj/ya/yp302001.djhtm?a=0&b=22&c=D&ff=1",note:"新興亞洲範圍，成熟亞洲曝險可能不同。"}
+    ],
+    taiwan:[
+      {name:"安聯台灣科技基金",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yb/yp001000.djhtm?a=ET001&b=910",note:"台灣科技股票，產業集中度較高。"},
+      {name:"安聯台灣大壩基金",type:"直接同類",source:"https://chubb.moneydj.com/w/wr/wr01.djhtm?a=ACDD01-EQTAL005",note:"台灣一般股票型，可比較主動選股與產業配置。"},
+      {name:"路博邁台灣 5G 股票基金",type:"鄰近策略",source:"https://b2bfundrwd.moneydj.com/w/wr/wr01.djhtm?a=ACNB01-ACNB01",note:"5G 主題，科技集中度較高。"},
+      {name:"野村台灣運籌基金",type:"直接同類",source:"https://www.moneydj.com/funddj/yb/yp001000.djhtm?a=ET001&b=910",note:"台灣一般股票型，可比較產業輪動。"},
+      {name:"元大多多基金 A 不配息",type:"直接同類",source:"https://tbbfws.moneydj.com/W4/wr/wr01.djhtm?a=ACYT03-8002&aspid=TBB",note:"台灣一般股票型，同幣別不配息級別。"},
+      {name:"統一奔騰基金",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yb/yp001000.djhtm?a=ET001&b=910",note:"台灣科技類股票，應特別比較集中度與波動。"}
+    ],
+    em:[
+      {name:"摩根環球新興市場機會基金 A 美元",type:"直接同類",source:"https://www.moneydj.com/funddj/ya/yp401001.djhtm?a=4&b=23&e=22&f=1&ff=1",note:"全球新興市場股票美元級別。"},
+      {name:"施羅德新興市場 A 累積美元",type:"直接同類",source:"https://www.moneydj.com/funddj/ya/yp401001.djhtm?a=4&b=23&e=22&f=1&ff=1",note:"全球新興市場股票美元級別。"}
+    ]
+  };
+
+  var market = {
+    title:"AI 與企業獲利延續支撐，但通膨、政策與區域分化仍高",
+    body:"富達 2026 年 8 月資產配置觀點維持選擇性加碼股票，並強調主動管理與精選標的；美國聯準會官員 9 月 3 日表示，政策仍高度依賴即將公布的通膨資料。銷售對話應從「猜高點」轉向「配置角色與分批節奏」。",
+    source:"https://www.fidelity.com.tw/insights-learning/market-insights/global-asset-allocation-2608/",
+    fed:"https://www.federalreserve.gov/newsevents/speech/waller20260903a.htm"
+  };
+
+  var state = {
+    page:"home",
+    fundId:"japan",
+    peerName:"",
+    client:"55 歲企業主，台股部位高，希望增加海外資產，但擔心市場估值偏高。",
+    mode:"反直覺破題",
+    generated:false,
+    query:""
+  };
+
+  var frames = {
+    "反直覺破題":"市場很高時，最大的風險未必是開始投資，而是讓原有風險繼續高度集中。",
+    "故事比喻":"投資組合像一支球隊：明星前鋒再強，也不能九個位置都放前鋒。",
+    "董事會精準":"今天不預測高點，只做一個決策：要不要降低單一風險來源對總資產的支配力。",
+    "蘇格拉底提問":"如果未來一年市場不照任何人的劇本走，您希望組合靠什麼繼續前進？"
+  };
+
+  function currentFund() {
+    return funds.filter(function (f) { return f.id === state.fundId; })[0];
+  }
+
+  function currentPeers() {
+    return peers[state.fundId] || [];
+  }
+
+  function currentPeer() {
+    var list = currentPeers();
+    var match = list.filter(function (p) { return p.name === state.peerName; })[0];
+    return match || list[0];
+  }
+
+  function cleanName(name) {
+    return name.replace("富達基金－", "");
+  }
+
+  function pct(value) {
+    return "+" + Number(value).toFixed(2) + "%";
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, function (char) {
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
+    });
+  }
+
+  function title(eyebrow, heading, text) {
+    return '<div class="title"><div><small>' + eyebrow + '</small><h1>' + heading + '</h1><p>' + text + '</p></div><span><i></i> VERIFIED DATA<br><small>2026/09/04</small></span></div>';
+  }
+
+  function options(items, selected, key, label) {
+    return items.map(function (item) {
+      var value = item[key];
+      return '<option value="' + escapeHtml(value) + '"' + (value === selected ? " selected" : "") + '>' + escapeHtml(label(item)) + '</option>';
+    }).join("");
+  }
+
+  function renderHome() {
+    var cards = funds.map(function (f, i) {
+      return '<button data-fund="' + f.id + '" class="' + (i === 0 ? "featured" : "") + '"><div><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + f.risk + '</span></div><small>' + f.asset + ' / ' + f.theme + '</small><h3>' + cleanName(f.name) + '</h3><p>' + f.share + '</p><div class="return"><small>1Y · ' + f.perfDate + '</small><b>' + pct(f.y1) + '</b></div></button>';
+    }).join("");
+    return '<div class="page">' +
+      '<section class="hero"><div class="heroCopy"><div class="kicker">FIDELITY / SALES EDGE</div><h1>把市場雜訊，<br><span>變成成交洞察。</span></h1><p>九檔核心基金、同類型競品與當期市場論證，在一次客戶對話需要的距離內。</p><div class="actions"><button data-go="compare">進入競品決策室</button><button class="outline" data-go="script">開啟話術實驗室</button></div></div>' +
+      '<article class="signal"><div class="signalTop"><small>TODAY\'S CONVICTION</small><b>01 / 09</b></div><h2>日本價值的重估，<br>不只是匯率交易。</h2><p>從公司治理、股東回報與資本效率切入，讓客戶理解結構性改變，而不是追逐單日指數。</p><div class="stat"><span>近一年累計<small>2026/07/31</small></span><strong>+37.82%</strong></div><button data-fund="japan">拆解競品 →</button></article></section>' +
+      '<section class="marketBar"><div><small>MARKET SIGNAL / 09.04</small><h2>' + market.title + '</h2></div><p>' + market.body + '</p><a href="' + market.source + '">富達觀點 ↗</a></section>' +
+      '<section class="sectionHead"><div><small>CORE PRIORITIES</small><h2>九檔主推基金</h2></div><button data-go="library">完整資料庫 →</button></section><div class="fundGrid">' + cards + '</div></div>';
+  }
+
+  function renderCompare() {
+    var fund = currentFund();
+    var list = currentPeers();
+    var peer = currentPeer();
+    var fundOptions = options(funds, fund.id, "id", function (f) { return f.name + "｜" + f.share; });
+    var peerOptions = options(list, peer.name, "name", function (p) { return p.name; });
+    var peerCards = list.map(function (p, i) {
+      return '<button data-peer="' + escapeHtml(p.name) + '" class="' + (p.name === peer.name ? "active" : "") + '"><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + p.type + '</span><h3>' + p.name + '</h3><p>' + p.note + '</p><small>查看比較 →</small></button>';
+    }).join("");
+    var opening = "很多客戶先問哪一檔報酬高，但真正專業的比較要先確認級別、幣別、資料日與投資範圍。" + fund.name + "的配置角色是：" + fund.role + "。";
+    return '<div class="page">' + title("COMPETITOR INTELLIGENCE", "競品決策室", "先確認可比性，再談績效；沒有同日口徑，就不下勝負結論。") +
+      '<div class="selectors"><label>富達核心基金<select id="fundSelect">' + fundOptions + '</select></label><b>VS</b><label>競品基金<select id="peerSelect">' + peerOptions + '</select></label></div>' +
+      '<section class="compareLead"><div><small>' + peer.type + '</small><h2>' + cleanName(fund.name) + '<br><span>對比 ' + peer.name + '</span></h2><p>' + peer.note + '</p><button data-copy="' + escapeHtml(opening) + '">複製顧問式開場</button></div><div class="verified"><small>FIDELITY VERIFIED</small><b>' + pct(fund.y1) + '</b><span>近一年累計 · ' + fund.perfDate + '</span><b>' + fund.nav + '</b><span>最新淨值 · ' + fund.navDate + '</span></div></section>' +
+      '<div class="compareGrid"><section class="card"><div class="cardHead"><div><small>COMPARABILITY MAP</small><h2>五維可比性檢查</h2></div><span>方法論，不是評分</span></div><div class="pentagon"><div class="pGrid one"></div><div class="pGrid two"></div><div class="pGrid three"></div><div class="pFill"></div><b class="l1">資產類別 ✓</b><b class="l2">投資範圍 ✓</b><b class="l3">策略接近 ✓</b><b class="l4">同日績效 —</b><b class="l5">同幣別級別 —</b></div><p class="method">前三項可比較；同日績效與同幣別級別尚未取得，因此不顯示競品報酬或宣稱勝負。</p></section>' +
+      '<section class="card evidence"><small>SOURCE AUDIT</small><h2>證據與口徑</h2><dl><div><dt>富達級別</dt><dd>' + fund.share + '</dd></div><div><dt>淨值</dt><dd>' + fund.nav + '<small>' + fund.navDate + '</small></dd></div><div><dt>績效</dt><dd>1Y ' + pct(fund.y1) + ' / 3Y ' + pct(fund.y3) + '<small>' + fund.perfDate + '</small></dd></div><div><dt>競品數字</dt><dd class="pending">未取得同日同幣別，不顯示</dd></div></dl><a href="' + fund.source + '">富達資料來源 ↗</a><a class="secondary" href="' + peer.source + '">競品資料來源 ↗</a></section></div>' +
+      '<section class="sectionHead"><div><small>PEER UNIVERSE</small><h2>' + cleanName(fund.name) + '競品池</h2></div><span>' + list.length + ' 檔</span></section><div class="peerGrid">' + peerCards + '</div></div>';
+  }
+
+  function fullScript() {
+    var fund = currentFund();
+    return "「" + frames[state.mode] + "」\n\n我理解您的擔心。" + market.body + "\n\n" + fund.name + "要扮演的不是『下一檔一定上漲的基金』，而是" + fund.role + "。" + fund.thesis + "\n\n我們不需要一次判斷完市場；可以先設定符合承受度的起始比例，再用分批與固定檢視條件執行。基金仍有波動與本金損失風險，實際配置應依客戶投資期限與風險屬性調整。";
+  }
+
+  function renderScript() {
+    var fund = currentFund();
+    var fundOptions = options(funds, fund.id, "id", function (f) { return f.name; });
+    var modeOptions = Object.keys(frames).map(function (mode) {
+      return '<option value="' + mode + '"' + (mode === state.mode ? " selected" : "") + '>' + mode + '</option>';
+    }).join("");
+    var output = state.generated ?
+      '<blockquote>「' + frames[state.mode] + '」</blockquote><h3>市場證據</h3><p>' + market.body + '</p><h3>產品角色</h3><p>' + fund.role + '。' + fund.thesis + '</p><h3>不靠預測的下一步</h3><p>先設定符合承受度的起始比例，再用分批與固定檢視條件執行。</p>' :
+      '<div class="empty"><span>✦</span><h3>等待產生話術</h3><p>四種切角會改變問題定義與論證順序，不只是替換用字。</p></div>';
+    return '<div class="page">' + title("CONVERSATION LAB", "話術實驗室", "創意負責打開對話，證據負責守住邏輯與法遵。") +
+      '<section class="marketNote"><small>LIVE MARKET CONTEXT · 2026/09/04</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '">富達 8 月資產配置觀點 ↗</a><a href="' + market.fed + '">聯準會 9/3 談話 ↗</a></div></section>' +
+      '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT BRIEF</small><h2>建立客戶情境</h2><label>客戶描述<textarea id="clientText">' + escapeHtml(state.client) + '</textarea></label><label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><button id="generateScript">產生話術 →</button></section>' +
+      '<section class="card output ' + (state.generated ? "ready" : "") + '"><div class="cardHead"><div><small>02 / SALES NARRATIVE</small><h2>客製對話框架</h2></div>' + (state.generated ? '<button data-copy="' + escapeHtml(fullScript()) + '">複製全文</button>' : "") + '</div>' + output + '</section></div>' +
+      '<section class="objections"><div class="sectionHead"><div><small>OBJECTION HANDLING</small><h2>快速異議處理</h2></div></div><div>' +
+      objection("市場是不是太高？", "不以單一點位做全進全出；先確認組合集中風險，再用分批與風險預算控制進場。") +
+      objection("為什麼不買 ETF？", "ETF 適合取得市場曝險；" + cleanName(fund.name) + "是否值得加入，要看它能否補足現有持股的風格與集中缺口。") +
+      objection("競品最近報酬更好？", "先把級別、幣別、配息政策與資料日對齊；口徑不同時，不應直接宣稱勝負。") +
+      '</div></section></div>';
+  }
+
+  function objection(question, answer) {
+    return '<article><small>QUESTION</small><h3>' + question + '</h3><p>' + answer + '</p><button data-copy="' + escapeHtml(answer) + '">複製回答</button></article>';
+  }
+
+  function renderLibrary() {
+    var q = state.query.toLowerCase();
+    var list = funds.filter(function (f) {
+      return (f.name + f.en + f.asset + f.theme).toLowerCase().indexOf(q) >= 0;
+    });
+    var rows = list.map(function (f) {
+      return '<tr><td><b>' + f.name + '</b><small>' + f.share + '</small></td><td>' + f.asset + '<small>' + f.theme + '</small></td><td><span>' + f.risk + '</span></td><td class="green">' + pct(f.y1) + '<small>' + f.perfDate + '</small></td><td class="green">' + pct(f.y3) + '<small>' + f.perfDate + '</small></td><td><b>' + f.nav + '</b><small>' + f.navDate + '</small></td><td><a href="' + f.source + '">核對 ↗</a><button data-fund="' + f.id + '">比較 →</button></td></tr>';
+    }).join("");
+    return '<div class="page">' + title("SOURCE-CONTROLLED DATABASE", "基金資料庫", "每一個數字都附資料日期與來源；不同日期不混用。") +
+      '<label class="search">搜尋<input id="librarySearch" value="' + escapeHtml(state.query) + '" placeholder="基金、類型或策略…"></label><div class="table"><table><thead><tr><th>基金／級別</th><th>類型</th><th>風險</th><th>近一年累計</th><th>近三年累計</th><th>最新淨值</th><th>來源</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="footnote">境外基金資料來源：富達台灣基金總覽；台灣成長基金最新淨值來源：MoneyDJ。績效為原幣級別累計報酬，過去績效不代表未來。</p></div>';
+  }
+
+  function view() {
+    if (state.page === "compare") return renderCompare();
+    if (state.page === "script") return renderScript();
+    if (state.page === "library") return renderLibrary();
+    return renderHome();
+  }
+
+  function render() {
+    var navigation = [
+      ["home", "今日焦點"],
+      ["compare", "競品決策室"],
+      ["script", "話術實驗室"],
+      ["library", "基金資料庫"]
+    ].map(function (item, i) {
+      return '<button data-page="' + item[0] + '" class="' + (state.page === item[0] ? "active" : "") + '"><em>0' + (i + 1) + '</em>' + item[1] + '</button>';
+    }).join("");
+    document.getElementById("app").innerHTML =
+      '<div class="app"><aside class="rail"><div class="brand"><span>F</span><div><b>Fidelity</b><small>SALES INTELLIGENCE</small></div></div><nav>' + navigation + '</nav><div class="railFoot"><i></i>DATA VERIFIED<br><small>查核時間 2026/09/04</small></div></aside>' +
+      '<main><header><span class="mobileBrand">Fidelity</span><span>LOCAL DESKTOP APP</span><b>TW · ZH</b></header>' + view() +
+      '<footer>僅供內部業務參考，非基金排名或投資建議。基金有價格波動及本金損失風險；過去績效不代表未來。使用前請依最新公開說明書與法遵規範確認。</footer></main></div><div id="toast" class="toast" hidden>已複製到剪貼簿</div>';
+    bind();
+  }
+
+  function bind() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-page]"), function (button) {
+      button.addEventListener("click", function () {
+        state.page = button.getAttribute("data-page");
+        render();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-go]"), function (button) {
+      button.addEventListener("click", function () {
+        state.page = button.getAttribute("data-go");
+        render();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-fund]"), function (button) {
+      button.addEventListener("click", function () {
+        state.fundId = button.getAttribute("data-fund");
+        state.peerName = "";
+        state.page = "compare";
+        render();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-peer]"), function (button) {
+      button.addEventListener("click", function () {
+        state.peerName = button.getAttribute("data-peer");
+        render();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (button) {
+      button.addEventListener("click", function () {
+        copyText(button.getAttribute("data-copy"));
+      });
+    });
+
+    var fundSelect = document.getElementById("fundSelect");
+    if (fundSelect) fundSelect.addEventListener("change", function () {
+      state.fundId = fundSelect.value;
+      state.peerName = "";
+      render();
+    });
+    var peerSelect = document.getElementById("peerSelect");
+    if (peerSelect) peerSelect.addEventListener("change", function () {
+      state.peerName = peerSelect.value;
+      render();
+    });
+    var scriptFund = document.getElementById("scriptFund");
+    if (scriptFund) scriptFund.addEventListener("change", function () {
+      state.fundId = scriptFund.value;
+      state.generated = false;
+      render();
+    });
+    var modeSelect = document.getElementById("modeSelect");
+    if (modeSelect) modeSelect.addEventListener("change", function () {
+      state.mode = modeSelect.value;
+      state.generated = false;
+      render();
+    });
+    var clientText = document.getElementById("clientText");
+    if (clientText) clientText.addEventListener("input", function () {
+      state.client = clientText.value;
+      state.generated = false;
+    });
+    var generate = document.getElementById("generateScript");
+    if (generate) generate.addEventListener("click", function () {
+      state.client = document.getElementById("clientText").value;
+      state.generated = true;
+      render();
+    });
+    var search = document.getElementById("librarySearch");
+    if (search) search.addEventListener("input", function () {
+      state.query = search.value;
+      render();
+      var next = document.getElementById("librarySearch");
+      if (next) {
+        next.focus();
+        next.setSelectionRange(next.value.length, next.value.length);
+      }
+    });
+  }
+
+  function copyText(text) {
+    var area = document.createElement("textarea");
+    area.value = text || "";
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+    var toast = document.getElementById("toast");
+    if (toast) {
+      toast.hidden = false;
+      window.setTimeout(function () { toast.hidden = true; }, 1500);
+    }
+  }
+
+  render();
+}());
