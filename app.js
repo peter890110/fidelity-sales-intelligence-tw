@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  var auditDate = "2026/09/08";
   var fidelitySource = "https://www.fidelity.com.tw/fund-and-service/fundui/funds/?grouping=%24fundRangeCode&intcmp=menu_ws_fund-and-service_sep_2022";
   var funds = [
     {id:"japan",name:"富達基金－日本價值基金",en:"Fidelity Japan Value Fund",share:"A2股日圓",asset:"股票型",theme:"日本價值",risk:"RR4",nav:"11,531.2000 日圓",navDate:"2026/09/03",y1:40.58,y3:91.92,perfDate:"2026/09/03",thesis:"公司治理改革、資本效率提升與價值重估構成長期選股脈絡。",role:"降低純科技成長曝險，補進日本企業改革紅利",source:"https://www.moneydj.com/funddj/yp/yp012001.djhtm?a=FTZA66",metrics:{asOf:"2026/09/03",y1:40.58,risk:18.48,distribution:0.02,distributionDate:"2026/07/31",expense:1.50,sharpe:0.55,distributionNote:"最新年化配息率（年配）",perfSource:"https://www.moneydj.com/funddj/yp/yp012001.djhtm?a=FTZA66",basicSource:"https://www.moneydj.com/funddj/yp/yp011001.djhtm?a=FTZA66",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=FTZA66"}},
@@ -10,7 +11,7 @@
     {id:"sustainable",name:"富達基金－永續發展全球存股優勢基金",en:"Fidelity Global Dividend Plus Fund",share:"A股累計美元",asset:"股票型",theme:"全球股息／永續",risk:"RR4",nav:"15.4800 美元",navDate:"2026/08/28",y1:15.56,y3:33.60,perfDate:"2026/07/31",thesis:"聚焦具品質、股息韌性與永續特徵的全球企業。",role:"補足科技集中之外的品質股息來源",source:fidelitySource},
     {id:"tech",name:"富達基金－全球科技基金",en:"Fidelity Global Technology Fund",share:"A股歐元",asset:"股票型",theme:"全球科技",risk:"RR4",nav:"95.8500 歐元",navDate:"2026/08/28",y1:20.02,y3:32.78,perfDate:"2026/07/31",thesis:"透過全球科技選股參與 AI、軟體、半導體與數位轉型。",role:"取得全球科技創新與產業擴散機會",source:fidelitySource},
     {id:"asia",name:"富達基金－亞洲成長趨勢基金",en:"Fidelity Asian Special Situations Fund",share:"A股累計美元",asset:"股票型",theme:"亞洲成長",risk:"RR5",nav:"52.8400 美元",navDate:"2026/08/28",y1:50.34,y3:72.32,perfDate:"2026/07/31",thesis:"從亞洲供應鏈、消費升級與數位化中尋找結構性成長。",role:"擴大美股之外的亞洲成長來源",source:fidelitySource},
-    {id:"taiwan",name:"富達台灣成長基金",en:"Fidelity Taiwan Growth Fund",share:"A股累積型（新臺幣）",asset:"股票型",theme:"台股成長",risk:"RR5",nav:"234.6400 新臺幣",navDate:"2026/09/04",y1:132.77,y3:157.79,perfDate:"2026/07/31",thesis:"主動選擇台灣具成長性與競爭力的企業，掌握產業升級。",role:"聚焦台灣成長企業與 AI 供應鏈機會",source:"https://www.moneydj.com/FUNDDJ/YA/YP010000_ACFD02.DJHTM"},
+    {id:"taiwan",name:"富達台灣成長基金",en:"Fidelity Taiwan Growth Fund",share:"A類型累積型（新臺幣）",asset:"股票型",theme:"台股成長",risk:"RR4",nav:"234.6400 新臺幣",navDate:"2026/09/04",y1:148.14,y3:284.72,perfDate:"2026/09/04",thesis:"主動選擇台灣具成長性與競爭力的企業，掌握產業升級。",role:"聚焦台灣成長企業與 AI 供應鏈機會",source:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACFD02",metrics:{asOf:"2026/09/04",y1:148.14,risk:50.67,distribution:0,distributionDate:"2026/09/04",expense:1.60,sharpe:0.59,distributionNote:"A 累積型；MoneyDJ 未列配息頻率／查無配息紀錄",perfSource:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACFD02",basicSource:"https://www.moneydj.com/funddj/yp/yp011000.djhtm?a=ACFD02",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=ACFD02"}},
     {id:"em",name:"富達基金－新興市場基金",en:"Fidelity Emerging Markets Fund",share:"A股美元",asset:"股票型",theme:"新興市場",risk:"RR5",nav:"51.8100 美元",navDate:"2026/08/28",y1:44.66,y3:61.64,perfDate:"2026/07/31",thesis:"以在地研究辨識國家、產業與企業差異，而非將新興市場視為單一交易。",role:"增加成熟市場之外的結構性成長來源",source:fidelitySource}
   ];
 
@@ -53,12 +54,12 @@
       {name:"施羅德新興亞洲 A 累積美元",type:"直接同類",source:"https://www.moneydj.com/funddj/ya/yp302001.djhtm?a=0&b=22&c=D&ff=1",note:"新興亞洲範圍，成熟亞洲曝險可能不同。"}
     ],
     taiwan:[
-      {name:"安聯台灣科技基金",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yb/yp001000.djhtm?a=ET001&b=910",note:"台灣科技股票，產業集中度較高。"},
-      {name:"安聯台灣大壩基金",type:"直接同類",source:"https://chubb.moneydj.com/w/wr/wr01.djhtm?a=ACDD01-EQTAL005",note:"台灣一般股票型，可比較主動選股與產業配置。"},
-      {name:"路博邁台灣 5G 股票基金",type:"鄰近策略",source:"https://b2bfundrwd.moneydj.com/w/wr/wr01.djhtm?a=ACNB01-ACNB01",note:"5G 主題，科技集中度較高。"},
-      {name:"野村台灣運籌基金",type:"直接同類",source:"https://www.moneydj.com/funddj/yb/yp001000.djhtm?a=ET001&b=910",note:"台灣一般股票型，可比較產業輪動。"},
-      {name:"元大多多基金 A 不配息",type:"直接同類",source:"https://tbbfws.moneydj.com/W4/wr/wr01.djhtm?a=ACYT03-8002&aspid=TBB",note:"台灣一般股票型，同幣別不配息級別。"},
-      {name:"統一奔騰基金",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yb/yp001000.djhtm?a=ET001&b=910",note:"台灣科技類股票，應特別比較集中度與波動。"}
+      {name:"安聯台灣科技基金",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACDD04",note:"台灣科技股票，產業集中度較高。",metrics:{asOf:"2026/09/04",y1:189.70,risk:49.14,distribution:0,distributionDate:"2026/09/04",expense:1.60,sharpe:0.71,distributionNote:"MoneyDJ 未列配息頻率／查無配息紀錄",perfSource:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACDD04",basicSource:"https://www.moneydj.com/funddj/yp/yp011000.djhtm?a=ACDD04",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=ACDD04"}},
+      {name:"安聯台灣大壩基金－A累積型（台幣）",type:"直接同類",source:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACDD01",note:"台灣一般股票型，可比較主動選股與產業配置。",metrics:{asOf:"2026/09/01",y1:176.40,risk:46.62,distribution:0,distributionDate:"2026/09/01",expense:1.60,sharpe:0.71,distributionNote:"A 累積型；MoneyDJ 未列配息頻率／查無配息紀錄",perfSource:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACDD01",basicSource:"https://www.moneydj.com/funddj/yp/yp011000.djhtm?a=ACDD01",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=ACDD01"}},
+      {name:"路博邁5G股票基金－T累積型（台幣）",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACNB47",note:"5G 主題，科技集中度較高。",metrics:{asOf:"2026/09/03",y1:66.31,risk:47.21,distribution:0,distributionDate:"2026/09/03",expense:2.00,sharpe:0.37,distributionNote:"T 累積型；MoneyDJ 未列配息頻率／查無配息紀錄",perfSource:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACNB47",basicSource:"https://www.moneydj.com/funddj/yp/yp011000.djhtm?a=ACNB47",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=ACNB47"}},
+      {name:"野村台灣運籌基金",type:"直接同類",source:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACKH03",note:"台灣一般股票型，可比較產業輪動。",metrics:{asOf:"2026/09/07",y1:182.67,risk:37.73,distribution:0,distributionDate:"2026/09/07",expense:1.50,sharpe:0.86,distributionNote:"MoneyDJ 未列配息頻率／查無配息紀錄",perfSource:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACKH03",basicSource:"https://www.moneydj.com/funddj/yp/yp011000.djhtm?a=ACKH03",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=ACKH03"}},
+      {name:"元大多多基金－A不配息（台幣）",type:"直接同類",source:"https://landbank.moneydj.com/w/wr/wr03.djhtm?a=ACYT03-B403",note:"台灣一般股票型，同幣別不配息級別。",metrics:{asOf:"2026/09/07",y1:204.71,risk:37.24,distribution:0,distributionDate:"2026/09/07",expense:1.75,sharpe:0.94,distributionNote:"A 不配息級別",perfSource:"https://landbank.moneydj.com/w/wr/wr03.djhtm?a=ACYT03-B403",basicSource:"https://www.moneydj.com/funddj/yp/yp011000.djhtm?a=ACYT03",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=ACYT03"}},
+      {name:"統一奔騰基金",type:"鄰近策略",source:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACPS10",note:"台灣科技類股票，應特別比較集中度與波動。",metrics:{asOf:"2026/09/04",y1:140.34,risk:50.34,distribution:0,distributionDate:"2026/09/04",expense:1.60,sharpe:0.57,distributionNote:"MoneyDJ 未列配息頻率／查無配息紀錄",perfSource:"https://www.moneydj.com/funddj/yp/yp012000.djhtm?a=ACPS10",basicSource:"https://www.moneydj.com/funddj/yp/yp011000.djhtm?a=ACPS10",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=ACPS10"}}
     ],
     em:[
       {name:"摩根環球新興市場機會基金 A 美元",type:"直接同類",source:"https://www.moneydj.com/funddj/ya/yp401001.djhtm?a=4&b=23&e=22&f=1&ff=1",note:"全球新興市場股票美元級別。"},
@@ -203,7 +204,7 @@
   }
 
   function title(eyebrow, heading, text) {
-    return '<div class="title"><div><small>' + eyebrow + '</small><h1>' + heading + '</h1><p>' + text + '</p></div><span><i></i> VERIFIED DATA<br><small>查核 2026/09/05</small></span></div>';
+    return '<div class="title"><div><small>' + eyebrow + '</small><h1>' + heading + '</h1><p>' + text + '</p></div><span><i></i> VERIFIED DATA<br><small>查核 ' + auditDate + '</small></span></div>';
   }
 
   function options(items, selected, key, label) {
@@ -231,11 +232,13 @@
     var fundOptions = options(funds, fund.id, "id", function (f) { return f.name + "｜" + f.share; });
     var peerOptions = options(list, peer.name, "name", function (p) { return p.name; });
     var peerCards = list.map(function (p, i) {
-      return '<button data-peer="' + escapeHtml(p.name) + '" class="' + (p.name === peer.name ? "active" : "") + '"><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + p.type + '</span><h3>' + p.name + '</h3><p>' + p.note + '</p><small>查看比較 →</small></button>';
+      var m = hasCompleteMetrics(p) ? p.metrics : null;
+      var summary = m ? '<div class="peerMiniMetrics"><b>1Y ' + metricDefinitions[0].format(m.y1) + '</b><span>風險 ' + metricDefinitions[1].format(m.risk) + '</span><span>費用 ' + metricDefinitions[3].format(m.expense) + '</span><small>資料日 ' + m.asOf + '</small></div>' : '';
+      return '<button data-peer="' + escapeHtml(p.name) + '" class="' + (p.name === peer.name ? "active" : "") + '"><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + p.type + '</span><h3>' + p.name + '</h3><p>' + p.note + '</p>' + summary + '<small>查看比較 →</small></button>';
     }).join("");
     var peerRows = list.map(function (p, i) {
       var m = hasCompleteMetrics(p) ? p.metrics : null;
-      return '<tr class="' + (p.name === peer.name ? "selected" : "") + '"><td>' + String(i + 1).padStart(2, "0") + '</td><td><b>' + p.name + '</b><small>' + p.note + '</small></td><td>' + p.type + '</td><td>' + (m ? metricDefinitions[0].format(m.y1) : "—") + '</td><td>' + (m ? metricDefinitions[1].format(m.risk) : "—") + '</td><td>' + (m ? metricDefinitions[3].format(m.expense) : "—") + '</td><td><button data-peer="' + escapeHtml(p.name) + '">比較 →</button></td></tr>';
+      return '<tr class="' + (p.name === peer.name ? "selected" : "") + '"><td>' + String(i + 1).padStart(2, "0") + '</td><td><b>' + p.name + '</b><small>' + p.note + '</small></td><td>' + p.type + '</td><td>' + (m ? '<b>' + metricDefinitions[0].format(m.y1) + '</b><small>資料日 ' + m.asOf + '</small>' : "—") + '</td><td>' + (m ? '<b>' + metricDefinitions[1].format(m.risk) + '</b><small>年化標準差</small>' : "—") + '</td><td>' + (m ? '<b>' + metricDefinitions[3].format(m.expense) + '</b><small>最高管理年費</small>' : "—") + '</td><td><button data-peer="' + escapeHtml(p.name) + '">比較 →</button><a href="' + p.source + '" target="_blank" rel="noopener">來源 ↗</a></td></tr>';
     }).join("");
     var opening = "很多客戶先問哪一檔報酬高，但真正專業的比較要先確認級別、幣別、資料日與投資範圍。" + fund.name + "的配置角色是：" + fund.role + "。";
     var peerMetricEvidence = hasCompleteMetrics(peer) ? '1Y ' + metricDefinitions[0].format(peer.metrics.y1) + ' / 年化標準差 ' + metricDefinitions[1].format(peer.metrics.risk) + ' / Sharpe ' + metricDefinitions[4].format(peer.metrics.sharpe) + '<small>' + peer.metrics.asOf + '</small>' : '<span class="pending">五指標尚未完成同源核對</span>';
@@ -246,7 +249,7 @@
       '<div class="keyData"><div><small>基金級別</small><b>' + fund.share + '</b><span>' + fund.asset + '</span></div><div><small>近一年累計</small><b>' + pct(fund.y1) + '</b><span>' + fund.perfDate + '</span></div><div><small>近三年累計</small><b>' + pct(fund.y3) + '</b><span>' + fund.perfDate + '</span></div><div><small>風險等級</small><b>' + fund.risk + '</b><span>數字越高風險越高</span></div><div><small>最新淨值</small><b>' + fund.nav + '</b><span>' + fund.navDate + '</span></div></div>' +
       '<div id="metrics" class="compareGrid"><section class="card radarCard"><div class="cardHead"><div><small>FIVE-METRIC RADAR</small><h2>五指標同類比較</h2></div><span>原始數字｜非主觀評分</span></div>' + radarChart(fund, peer) + '<p class="method">雷達圖只做同類池相對位置視覺化，不是星等，也不代表投資建議。風險採年化標準差；費用率採最高經理費；累積級別無配息紀錄時列 0.00%。</p></section>' +
       '<section id="sources" class="card evidence"><small>SOURCE AUDIT</small><h2>證據與口徑</h2><dl><div><dt>富達級別</dt><dd>' + fund.share + '</dd></div><div><dt>淨值</dt><dd>' + fund.nav + '<small>' + fund.navDate + '</small></dd></div><div><dt>績效</dt><dd>1Y ' + pct(fund.y1) + ' / 3Y ' + pct(fund.y3) + '<small>' + fund.perfDate + '</small></dd></div><div><dt>競品五指標</dt><dd>' + peerMetricEvidence + '</dd></div></dl><a href="' + fund.source + '">富達績效來源 ↗</a><a class="secondary" href="' + peer.source + '">競品績效來源 ↗</a>' + (hasCompleteMetrics(fund) ? '<a class="secondary" href="' + fund.metrics.basicSource + '">費用資料來源 ↗</a>' : '') + '</section></div>' +
-      '<section id="universe" class="sectionHead"><div><small>PEER UNIVERSE</small><h2>' + cleanName(fund.name) + '競品池</h2></div><span>' + list.length + ' 檔</span></section><div class="peerTable table"><table><thead><tr><th>#</th><th>基金／比較摘要</th><th>可比性</th><th>一年績效</th><th>風險</th><th>費用率</th><th>動作</th></tr></thead><tbody>' + peerRows + '</tbody></table></div><div class="peerGrid peerGridFallback">' + peerCards + '</div></div>';
+      '<section id="universe" class="sectionHead"><div><small>PEER UNIVERSE</small><h2>' + cleanName(fund.name) + '競品池</h2></div><span>' + list.length + ' 檔</span></section><div class="peerTable table"><table><thead><tr><th>#</th><th>基金／比較摘要</th><th>可比性</th><th>一年績效</th><th>風險</th><th>費用率</th><th>動作</th></tr></thead><tbody>' + peerRows + '</tbody></table></div><p class="footnote peerAuditNote">資料查核：' + auditDate + '。一年績效為各基金 MoneyDJ 最新資料日的單筆申購累積報酬；風險為年化標準差；費用率為最高管理年費。各列資料日可能不同，請勿把未對齊日期的數字直接解讀為排名。</p><div class="peerGrid peerGridFallback">' + peerCards + '</div></div>';
   }
 
   function fullScript() {
@@ -307,7 +310,7 @@
       return '<button data-page="' + item[0] + '" class="' + (state.page === item[0] ? "active" : "") + '"><em>0' + (i + 1) + '</em>' + item[1] + '</button>';
     }).join("");
     document.getElementById("app").innerHTML =
-      '<div class="app"><aside class="rail"><div class="brand"><img src="fidelity-international.svg" alt="Fidelity International"><div><small>SALES INTELLIGENCE</small><span>內部業務決策平台</span></div></div><nav>' + navigation + '</nav><div class="railFoot"><i></i>DATA VERIFIED <small>查核時間 2026/09/05</small></div></aside>' +
+      '<div class="app"><aside class="rail"><div class="brand"><img src="fidelity-international.svg" alt="Fidelity International"><div><small>SALES INTELLIGENCE</small><span>內部業務決策平台</span></div></div><nav>' + navigation + '</nav><div class="railFoot"><i></i>DATA VERIFIED <small>查核時間 ' + auditDate + '</small></div></aside>' +
       '<main><header><span class="mobileBrand">Fidelity Sales Intelligence</span><span>INSTITUTIONAL SALES DESK</span><b>TAIWAN · 繁中</b></header>' + view() +
       '<footer>僅供內部業務參考，非基金排名或投資建議。基金有價格波動及本金損失風險；過去績效不代表未來。使用前請依最新公開說明書與法遵規範確認。</footer></main></div><div id="toast" class="toast" hidden>已複製到剪貼簿</div>';
     bind();
