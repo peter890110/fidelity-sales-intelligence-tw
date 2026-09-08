@@ -25,6 +25,7 @@
 .peerTable table{min-width:1040px}.peerTable th{background:var(--deep);padding:15px 13px}.peerTable td{padding:16px 13px;vertical-align:top}
 .peerTable td:nth-child(1){width:45px;color:#91a1a8}.peerTable td:nth-child(2){width:42%}.peerTable td:nth-child(3){width:110px}.peerTable td b{font-family:var(--serif);font-size:15px}.peerTable td small{line-height:1.5}
 .peerTable tr.selected{background:#f2f7f6;box-shadow:inset 4px 0 var(--red)}.peerTable button{color:var(--red)!important}
+.peerTable td:last-child a{color:var(--muted);margin-top:5px}.peerAuditNote{margin:-32px 0 50px;line-height:1.7}.peerMiniMetrics{border-top:1px solid var(--rule);margin-top:auto;padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px}.peerMiniMetrics>b{color:var(--red)}.peerMiniMetrics>small{grid-column:1/-1;color:var(--muted)}
 .peerGridFallback{display:none}
 .page:has(.compareLead){padding-bottom:70px}
 @media(max-width:980px){.compareAnchors{top:112px;margin-left:-22px;margin-right:-22px;padding-left:22px;padding-right:22px}.keyData{grid-template-columns:repeat(2,1fr)}.keyData>div{border-bottom:1px solid var(--rule)}.keyData>div:last-child{grid-column:1/-1}.compareLead{grid-template-columns:1fr}.verified{border-left:0;border-top:1px solid #476477;margin:0 30px;padding:28px 18px}.compareGrid{grid-template-columns:1fr}}
