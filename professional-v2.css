@@ -26,6 +26,7 @@
 .peerTable table{min-width:1040px}.peerTable th{background:var(--deep);padding:15px 13px}.peerTable td{padding:16px 13px;vertical-align:top}
 .peerTable td:nth-child(1){width:45px;color:#91a1a8}.peerTable td:nth-child(2){width:42%}.peerTable td:nth-child(3){width:110px}.peerTable td b{font-family:var(--serif);font-size:15px}.peerTable td small{line-height:1.5}
 .peerTable tr.selected{background:#f2f7f6;box-shadow:inset 4px 0 var(--red)}.peerTable button{color:var(--red)!important}
+.peerTable .dataUnavailable{font-family:var(--sans);font-size:13px;color:#a76b16}.peerTable .dataUnavailable+small{color:#7d6b4c}
 .peerTable td:last-child a{color:var(--muted);margin-top:5px}.peerAuditNote{margin:-32px 0 50px;line-height:1.7}.peerMiniMetrics{border-top:1px solid var(--rule);margin-top:auto;padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px}.peerMiniMetrics>b{color:var(--red)}.peerMiniMetrics>small{grid-column:1/-1;color:var(--muted)}
 .peerGridFallback{display:none}
 .page:has(.compareLead){padding-bottom:70px}
