@@ -84,6 +84,32 @@
     query:""
   };
 
+  function comparisonUrl(fundId, peerName) {
+    var url = new URL(window.location.href);
+    url.search = "";
+    url.searchParams.set("page", "compare");
+    url.searchParams.set("fund", fundId);
+    if (peerName) url.searchParams.set("peer", peerName);
+    url.hash = "comparison";
+    return url.toString();
+  }
+
+  function openComparison(fundId, peerName) {
+    window.open(comparisonUrl(fundId, peerName), "_blank", "noopener,noreferrer");
+  }
+
+  function restoreStateFromUrl() {
+    var params = new URLSearchParams(window.location.search);
+    var requestedFund = params.get("fund");
+    var requestedPeer = params.get("peer");
+    var validFund = funds.some(function (fund) { return fund.id === requestedFund; });
+    if (params.get("page") === "compare") state.page = "compare";
+    if (validFund) state.fundId = requestedFund;
+    if (requestedPeer && (peers[state.fundId] || []).some(function (peer) { return peer.name === requestedPeer; })) {
+      state.peerName = requestedPeer;
+    }
+  }
+
   var frames = {
     "反直覺破題":"市場很高時，最大的風險未必是開始投資，而是讓原有風險繼續高度集中。",
     "故事比喻":"投資組合像一支球隊：明星前鋒再強，也不能九個位置都放前鋒。",
@@ -216,12 +242,12 @@
 
   function renderHome() {
     var cards = funds.map(function (f, i) {
-      return '<button data-fund="' + f.id + '" class="' + (i === 0 ? "featured" : "") + '"><div><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + f.risk + '</span></div><small>' + f.asset + ' / ' + f.theme + '</small><h3>' + cleanName(f.name) + '</h3><p>' + f.share + '</p><div class="return"><small>1Y · ' + f.perfDate + '</small><b>' + pct(f.y1) + '</b></div></button>';
+      return '<button data-fund="' + f.id + '" class="' + (i === 0 ? "featured" : "") + '" title="另開比較頁"><div><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + f.risk + '</span></div><small>' + f.asset + ' / ' + f.theme + '</small><h3>' + cleanName(f.name) + '</h3><p>' + f.share + '</p><div class="return"><small>1Y · ' + f.perfDate + '</small><b>' + pct(f.y1) + '</b></div></button>';
     }).join("");
     return '<div class="page">' +
       '<section class="hero"><div class="heroCopy"><div class="kicker">FIDELITY / SALES EDGE</div><h1>把市場雜訊，<br><span>變成成交洞察。</span></h1><p>九檔核心基金、同類型競品與當期市場論證，在一次客戶對話需要的距離內。</p><div class="actions"><button data-go="compare">進入競品決策室</button><button class="outline" data-go="script">開啟話術實驗室</button></div></div>' +
-      '<article class="signal"><div class="signalTop"><small>TODAY\'S CONVICTION</small><b>01 / 09</b></div><h2>日本價值的重估，<br>不只是匯率交易。</h2><p>從公司治理、股東回報與資本效率切入，讓客戶理解結構性改變，而不是追逐單日指數。</p><div class="stat"><span>近一年累計<small>2026/09/03</small></span><strong>+40.58%</strong></div><button data-fund="japan">拆解競品 →</button></article></section>' +
-      '<section class="marketBar"><div><small>MARKET SIGNAL / 09.04</small><h2>' + market.title + '</h2></div><p>' + market.body + '</p><a href="' + market.source + '">富達觀點 ↗</a></section>' +
+      '<article class="signal"><div class="signalTop"><small>TODAY\'S CONVICTION</small><b>01 / 09</b></div><h2>日本價值的重估，<br>不只是匯率交易。</h2><p>從公司治理、股東回報與資本效率切入，讓客戶理解結構性改變，而不是追逐單日指數。</p><div class="stat"><span>近一年累計<small>2026/09/03</small></span><strong>+40.58%</strong></div><button data-fund="japan" title="另開比較頁">拆解競品 ↗</button></article></section>' +
+      '<section class="marketBar"><div><small>MARKET SIGNAL / 09.04</small><h2>' + market.title + '</h2></div><p>' + market.body + '</p><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達觀點 ↗</a></section>' +
       '<section class="sectionHead"><div><small>CORE PRIORITIES</small><h2>九檔主推基金</h2></div><button data-go="library">完整資料庫 →</button></section><div class="fundGrid">' + cards + '</div></div>';
   }
 
@@ -234,11 +260,11 @@
     var peerCards = list.map(function (p, i) {
       var m = hasCompleteMetrics(p) ? p.metrics : null;
       var summary = m ? '<div class="peerMiniMetrics"><b>1Y ' + metricDefinitions[0].format(m.y1) + '</b><span>風險 ' + metricDefinitions[1].format(m.risk) + '</span><span>費用 ' + metricDefinitions[3].format(m.expense) + '</span><small>資料日 ' + m.asOf + '</small></div>' : '';
-      return '<button data-peer="' + escapeHtml(p.name) + '" class="' + (p.name === peer.name ? "active" : "") + '"><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + p.type + '</span><h3>' + p.name + '</h3><p>' + p.note + '</p>' + summary + '<small>查看比較 →</small></button>';
+      return '<button data-peer="' + escapeHtml(p.name) + '" class="' + (p.name === peer.name ? "active" : "") + '" title="另開比較頁"><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + p.type + '</span><h3>' + p.name + '</h3><p>' + p.note + '</p>' + summary + '<small>查看比較 ↗</small></button>';
     }).join("");
     var peerRows = list.map(function (p, i) {
       var m = hasCompleteMetrics(p) ? p.metrics : null;
-      return '<tr class="' + (p.name === peer.name ? "selected" : "") + '"><td>' + String(i + 1).padStart(2, "0") + '</td><td><b>' + p.name + '</b><small>' + p.note + '</small></td><td>' + p.type + '</td><td>' + (m ? '<b>' + metricDefinitions[0].format(m.y1) + '</b><small>資料日 ' + m.asOf + '</small>' : "—") + '</td><td>' + (m ? '<b>' + metricDefinitions[1].format(m.risk) + '</b><small>年化標準差</small>' : "—") + '</td><td>' + (m ? '<b>' + metricDefinitions[3].format(m.expense) + '</b><small>最高管理年費</small>' : "—") + '</td><td><button data-peer="' + escapeHtml(p.name) + '">比較 →</button><a href="' + p.source + '" target="_blank" rel="noopener">來源 ↗</a></td></tr>';
+      return '<tr class="' + (p.name === peer.name ? "selected" : "") + '"><td>' + String(i + 1).padStart(2, "0") + '</td><td><b>' + p.name + '</b><small>' + p.note + '</small></td><td>' + p.type + '</td><td>' + (m ? '<b>' + metricDefinitions[0].format(m.y1) + '</b><small>資料日 ' + m.asOf + '</small>' : "—") + '</td><td>' + (m ? '<b>' + metricDefinitions[1].format(m.risk) + '</b><small>年化標準差</small>' : "—") + '</td><td>' + (m ? '<b>' + metricDefinitions[3].format(m.expense) + '</b><small>最高管理年費</small>' : "—") + '</td><td><button data-peer="' + escapeHtml(p.name) + '" title="另開比較頁">比較 ↗</button><a href="' + p.source + '" target="_blank" rel="noopener noreferrer">來源 ↗</a></td></tr>';
     }).join("");
     var opening = "很多客戶先問哪一檔報酬高，但真正專業的比較要先確認級別、幣別、資料日與投資範圍。" + fund.name + "的配置角色是：" + fund.role + "。";
     var peerMetricEvidence = hasCompleteMetrics(peer) ? '1Y ' + metricDefinitions[0].format(peer.metrics.y1) + ' / 年化標準差 ' + metricDefinitions[1].format(peer.metrics.risk) + ' / Sharpe ' + metricDefinitions[4].format(peer.metrics.sharpe) + '<small>' + peer.metrics.asOf + '</small>' : '<span class="pending">五指標尚未完成同源核對</span>';
@@ -248,7 +274,7 @@
       '<section id="comparison" class="compareLead"><div><small>' + peer.type + '</small><h2>' + cleanName(fund.name) + '<br><span>對比 ' + peer.name + '</span></h2><p>' + peer.note + '</p><button data-copy="' + escapeHtml(opening) + '">複製顧問式開場</button></div><div class="verified"><small>FIDELITY VERIFIED</small><b>' + pct(fund.y1) + '</b><span>近一年累計 · ' + fund.perfDate + '</span><b>' + fund.nav + '</b><span>最新淨值 · ' + fund.navDate + '</span></div></section>' +
       '<div class="keyData"><div><small>基金級別</small><b>' + fund.share + '</b><span>' + fund.asset + '</span></div><div><small>近一年累計</small><b>' + pct(fund.y1) + '</b><span>' + fund.perfDate + '</span></div><div><small>近三年累計</small><b>' + pct(fund.y3) + '</b><span>' + fund.perfDate + '</span></div><div><small>風險等級</small><b>' + fund.risk + '</b><span>數字越高風險越高</span></div><div><small>最新淨值</small><b>' + fund.nav + '</b><span>' + fund.navDate + '</span></div></div>' +
       '<div id="metrics" class="compareGrid"><section class="card radarCard"><div class="cardHead"><div><small>FIVE-METRIC RADAR</small><h2>五指標同類比較</h2></div><span>原始數字｜非主觀評分</span></div>' + radarChart(fund, peer) + '<p class="method">雷達圖只做同類池相對位置視覺化，不是星等，也不代表投資建議。風險採年化標準差；費用率採最高經理費；累積級別無配息紀錄時列 0.00%。</p></section>' +
-      '<section id="sources" class="card evidence"><small>SOURCE AUDIT</small><h2>證據與口徑</h2><dl><div><dt>富達級別</dt><dd>' + fund.share + '</dd></div><div><dt>淨值</dt><dd>' + fund.nav + '<small>' + fund.navDate + '</small></dd></div><div><dt>績效</dt><dd>1Y ' + pct(fund.y1) + ' / 3Y ' + pct(fund.y3) + '<small>' + fund.perfDate + '</small></dd></div><div><dt>競品五指標</dt><dd>' + peerMetricEvidence + '</dd></div></dl><a href="' + fund.source + '">富達績效來源 ↗</a><a class="secondary" href="' + peer.source + '">競品績效來源 ↗</a>' + (hasCompleteMetrics(fund) ? '<a class="secondary" href="' + fund.metrics.basicSource + '">費用資料來源 ↗</a>' : '') + '</section></div>' +
+      '<section id="sources" class="card evidence"><small>SOURCE AUDIT</small><h2>證據與口徑</h2><dl><div><dt>富達級別</dt><dd>' + fund.share + '</dd></div><div><dt>淨值</dt><dd>' + fund.nav + '<small>' + fund.navDate + '</small></dd></div><div><dt>績效</dt><dd>1Y ' + pct(fund.y1) + ' / 3Y ' + pct(fund.y3) + '<small>' + fund.perfDate + '</small></dd></div><div><dt>競品五指標</dt><dd>' + peerMetricEvidence + '</dd></div></dl><a href="' + fund.source + '" target="_blank" rel="noopener noreferrer">富達績效來源 ↗</a><a class="secondary" href="' + peer.source + '" target="_blank" rel="noopener noreferrer">競品績效來源 ↗</a>' + (hasCompleteMetrics(fund) ? '<a class="secondary" href="' + fund.metrics.basicSource + '" target="_blank" rel="noopener noreferrer">費用資料來源 ↗</a>' : '') + '</section></div>' +
       '<section id="universe" class="sectionHead"><div><small>PEER UNIVERSE</small><h2>' + cleanName(fund.name) + '競品池</h2></div><span>' + list.length + ' 檔</span></section><div class="peerTable table"><table><thead><tr><th>#</th><th>基金／比較摘要</th><th>可比性</th><th>一年績效</th><th>風險</th><th>費用率</th><th>動作</th></tr></thead><tbody>' + peerRows + '</tbody></table></div><p class="footnote peerAuditNote">資料查核：' + auditDate + '。一年績效為各基金 MoneyDJ 最新資料日的單筆申購累積報酬；風險為年化標準差；費用率為最高管理年費。各列資料日可能不同，請勿把未對齊日期的數字直接解讀為排名。</p><div class="peerGrid peerGridFallback">' + peerCards + '</div></div>';
   }
 
@@ -267,7 +293,7 @@
       '<blockquote>「' + frames[state.mode] + '」</blockquote><h3>市場證據</h3><p>' + market.body + '</p><h3>產品角色</h3><p>' + fund.role + '。' + fund.thesis + '</p><h3>不靠預測的下一步</h3><p>先設定符合承受度的起始比例，再用分批與固定檢視條件執行。</p>' :
       '<div class="empty"><span>✦</span><h3>等待產生話術</h3><p>四種切角會改變問題定義與論證順序，不只是替換用字。</p></div>';
     return '<div class="page">' + title("CONVERSATION LAB", "話術實驗室", "創意負責打開對話，證據負責守住邏輯與法遵。") +
-      '<section class="marketNote"><small>LIVE MARKET CONTEXT · 2026/09/04</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '">富達 8 月資產配置觀點 ↗</a><a href="' + market.fed + '">聯準會 9/3 談話 ↗</a></div></section>' +
+      '<section class="marketNote"><small>LIVE MARKET CONTEXT · 2026/09/04</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達 8 月資產配置觀點 ↗</a><a href="' + market.fed + '" target="_blank" rel="noopener noreferrer">聯準會 9/3 談話 ↗</a></div></section>' +
       '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT BRIEF</small><h2>建立客戶情境</h2><label>客戶描述<textarea id="clientText">' + escapeHtml(state.client) + '</textarea></label><label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><button id="generateScript">產生話術 →</button></section>' +
       '<section class="card output ' + (state.generated ? "ready" : "") + '"><div class="cardHead"><div><small>02 / SALES NARRATIVE</small><h2>客製對話框架</h2></div>' + (state.generated ? '<button data-copy="' + escapeHtml(fullScript()) + '">複製全文</button>' : "") + '</div>' + output + '</section></div>' +
       '<section class="objections"><div class="sectionHead"><div><small>OBJECTION HANDLING</small><h2>快速異議處理</h2></div></div><div>' +
@@ -287,7 +313,7 @@
       return (f.name + f.en + f.asset + f.theme).toLowerCase().indexOf(q) >= 0;
     });
     var rows = list.map(function (f) {
-      return '<tr><td><b>' + f.name + '</b><small>' + f.share + '</small></td><td>' + f.asset + '<small>' + f.theme + '</small></td><td><span>' + f.risk + '</span></td><td class="green">' + pct(f.y1) + '<small>' + f.perfDate + '</small></td><td class="green">' + pct(f.y3) + '<small>' + f.perfDate + '</small></td><td><b>' + f.nav + '</b><small>' + f.navDate + '</small></td><td><a href="' + f.source + '">核對 ↗</a><button data-fund="' + f.id + '">比較 →</button></td></tr>';
+      return '<tr><td><b>' + f.name + '</b><small>' + f.share + '</small></td><td>' + f.asset + '<small>' + f.theme + '</small></td><td><span>' + f.risk + '</span></td><td class="green">' + pct(f.y1) + '<small>' + f.perfDate + '</small></td><td class="green">' + pct(f.y3) + '<small>' + f.perfDate + '</small></td><td><b>' + f.nav + '</b><small>' + f.navDate + '</small></td><td><a href="' + f.source + '" target="_blank" rel="noopener noreferrer">核對 ↗</a><button data-fund="' + f.id + '" title="另開比較頁">比較 ↗</button></td></tr>';
     }).join("");
     return '<div class="page">' + title("SOURCE-CONTROLLED DATABASE", "基金資料庫", "每一個數字都附資料日期與來源；不同日期不混用。") +
       '<label class="search">搜尋<input id="librarySearch" value="' + escapeHtml(state.query) + '" placeholder="基金、類型或策略…"></label><div class="table"><table><thead><tr><th>基金／級別</th><th>類型</th><th>風險</th><th>近一年累計</th><th>近三年累計</th><th>最新淨值</th><th>來源</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="footnote">境外基金資料來源：富達台灣基金總覽；台灣成長基金最新淨值來源：MoneyDJ。績效為原幣級別累計報酬，過去績效不代表未來。</p></div>';
@@ -325,22 +351,23 @@
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-go]"), function (button) {
       button.addEventListener("click", function () {
-        state.page = button.getAttribute("data-go");
+        var destination = button.getAttribute("data-go");
+        if (destination === "compare") {
+          openComparison(state.fundId, state.peerName);
+          return;
+        }
+        state.page = destination;
         render();
       });
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-fund]"), function (button) {
       button.addEventListener("click", function () {
-        state.fundId = button.getAttribute("data-fund");
-        state.peerName = "";
-        state.page = "compare";
-        render();
+        openComparison(button.getAttribute("data-fund"), "");
       });
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-peer]"), function (button) {
       button.addEventListener("click", function () {
-        state.peerName = button.getAttribute("data-peer");
-        render();
+        openComparison(state.fundId, button.getAttribute("data-peer"));
       });
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (button) {
@@ -411,5 +438,12 @@
     }
   }
 
+  restoreStateFromUrl();
   render();
+  if (state.page === "compare" && window.location.hash) {
+    window.requestAnimationFrame(function () {
+      var target = document.getElementById(window.location.hash.slice(1));
+      if (target) target.scrollIntoView();
+    });
+  }
 }());
