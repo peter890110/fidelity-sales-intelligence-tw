@@ -301,8 +301,8 @@
       return '<button data-page="' + item[0] + '" class="' + (state.page === item[0] ? "active" : "") + '"><em>0' + (i + 1) + '</em>' + item[1] + '</button>';
     }).join("");
     document.getElementById("app").innerHTML =
-      '<div class="app"><aside class="rail"><div class="brand"><span>F</span><div><b>Fidelity</b><small>SALES INTELLIGENCE</small></div></div><nav>' + navigation + '</nav><div class="railFoot"><i></i>DATA VERIFIED<br><small>查核時間 2026/09/05</small></div></aside>' +
-      '<main><header><span class="mobileBrand">Fidelity</span><span>LOCAL DESKTOP APP</span><b>TW · ZH</b></header>' + view() +
+      '<div class="app"><aside class="rail"><div class="brand"><img src="https://www.fidelity.com.tw/static_cms/fil_site_assets_gds3/images/fil-logo-zh.svg" alt="Fidelity 富達"><div><small>SALES INTELLIGENCE</small><span>內部業務決策平台</span></div></div><nav>' + navigation + '</nav><div class="railFoot"><i></i>DATA VERIFIED <small>查核時間 2026/09/05</small></div></aside>' +
+      '<main><header><span class="mobileBrand">Fidelity Sales Intelligence</span><span>INSTITUTIONAL SALES DESK</span><b>TAIWAN · 繁中</b></header>' + view() +
       '<footer>僅供內部業務參考，非基金排名或投資建議。基金有價格波動及本金損失風險；過去績效不代表未來。使用前請依最新公開說明書與法遵規範確認。</footer></main></div><div id="toast" class="toast" hidden>已複製到剪貼簿</div>';
     bind();
   }
