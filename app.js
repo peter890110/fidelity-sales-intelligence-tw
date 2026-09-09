@@ -317,44 +317,180 @@
     return words.some(function (word) { return text.indexOf(word) >= 0; });
   }
 
+  var modeBlueprints = {
+    "反直覺破題":{journey:"表面問題 → 真正風險 → 重寫決策 → 證據 → 行動",tone:"先翻轉直覺，再把焦點拉回可控的組合決策。"},
+    "故事比喻":{journey:"場景 → 衝突 → 角色 → 轉折 → 下一章",tone:"用基金專屬故事，讓抽象配置變成可記住的畫面。"},
+    "董事會精準":{journey:"決策案 → 採用理由 → 通過條件 → 否決條件 → KPI",tone:"像向董事會提案：目的、限制、數據與決議一頁說清楚。"},
+    "蘇格拉底提問":{journey:"第一問 → 追問 → 自我辨識 → 共同結論 → 小承諾",tone:"不急著說服，讓客戶從答案中自己看見配置缺口。"},
+    "風險長官":{journey:"先說不適合 → 壓力測試 → 暴露檢查 → 允許條件 → 護欄",tone:"先揭露風險與不適合條件，再討論產品能否進入組合。"},
+    "兩分鐘成交":{journey:"0–20秒 → 20–45秒 → 45–75秒 → 75–100秒 → 120秒",tone:"限時完成洞察、診斷、產品角色、證據與下一步。"}
+  };
+
   function analyzeClient(text, fundId, selectedScenario) {
-    var source = String(text || "").replace(/\s+/g, " ");
+    var source = String(text || "").replace(/\s+/g, " ").trim();
     var ageMatch = source.match(/(\d{2})\s*歲/);
     var age = ageMatch ? Number(ageMatch[1]) : null;
-    var persona = includesAny(source, ["企業主","老闆","公司"]) ? "企業主" : includesAny(source, ["退休","退休族"]) ? "退休規劃族" : includesAny(source, ["工程師","上班族","受薪"]) ? "受薪投資人" : "投資人";
-    var holding = includesAny(source, ["台股","台積電","台灣股票"]) ? "台股" : includesAny(source, ["科技","半導體","AI"]) ? "科技股" : includesAny(source, ["美股","S&P","納斯達克"]) ? "美股" : includesAny(source, ["現金","定存"]) ? "現金" : includesAny(source, ["債券","債"]) ? "債券" : "現有部位";
-    var goal = includesAny(source, ["配息","現金流","收益","領息"]) ? "現金流" : includesAny(source, ["退休","保本","穩健"]) ? "退休穩健" : includesAny(source, ["海外","分散","全球"]) ? "海外分散" : includesAny(source, ["成長","增值","報酬"]) ? "長期增值" : "提升組合效率";
+    var amountMatch = source.match(/(\d+(?:\.\d+)?)\s*(億|萬)(?:元)?/);
+    var amount = amountMatch ? amountMatch[1] + amountMatch[2] : "未提供";
+    var lifeStage = age === null ? "待確認" : age < 35 ? "累積初期" : age < 50 ? "資產擴張期" : age < 65 ? "退休準備期" : "退休提領期";
+    var persona = includesAny(source, ["企業主","老闆","公司負責人","創業"]) ? "企業主" :
+      includesAny(source, ["退休","退休族"]) ? "退休規劃族" :
+      includesAny(source, ["醫師","律師","會計師","專業人士"]) ? "專業人士" :
+      includesAny(source, ["工程師","上班族","受薪"]) ? "受薪投資人" : "投資人";
+    var holdings = [];
+    if (includesAny(source, ["台股","台積電","台灣股票"])) holdings.push("台股");
+    if (includesAny(source, ["科技","半導體","AI"])) holdings.push("科技股");
+    if (includesAny(source, ["美股","S&P","納斯達克"])) holdings.push("美股");
+    if (includesAny(source, ["現金","定存"])) holdings.push("現金");
+    if (includesAny(source, ["債券","債"])) holdings.push("債券");
+    var holding = holdings.length ? holdings.join("＋") : "既有部位待確認";
+    var goals = [];
+    if (includesAny(source, ["配息","現金流","收益","領息"])) goals.push("現金流");
+    if (includesAny(source, ["退休","保本","穩健"])) goals.push("退休穩健");
+    if (includesAny(source, ["海外","分散","全球"])) goals.push("海外分散");
+    if (includesAny(source, ["成長","增值","報酬"])) goals.push("長期增值");
+    var goal = goals.length ? goals.join("＋") : "提升組合效率";
+    var horizon = includesAny(source, ["半年內","一年內","兩年內","短期","很快要用"]) ? "0–2 年" :
+      includesAny(source, ["三年","四年","中期"]) ? "3–5 年" :
+      includesAny(source, ["五年","十年","長期"]) ? "5 年以上" : "待確認";
+    var liquidity = includesAny(source, ["每月","生活費","醫療","買房","學費","很快要用","現金流"]) ? "高" :
+      includesAny(source, ["長期","十年","不用這筆錢"]) ? "低" : "待確認";
+    var riskTolerance = includesAny(source, ["不能跌","保本","非常保守","低風險","怕虧"]) ? "低" :
+      includesAny(source, ["積極","高風險","能承受","波動沒關係"]) ? "高" : "中／待確認";
+    var experience = includesAny(source, ["第一次","新手","沒買過"]) ? "初次投資" :
+      includesAny(source, ["投資多年","有經驗","長期投資"]) ? "有經驗" : "待確認";
     var scenario = selectedScenario;
     if (!scenario || scenario === "auto") {
       if (includesAny(source, ["高點","估值","太高","追高","泡沫"])) scenario = "valuation";
       else if (includesAny(source, ["配息","現金流","收益","領息"])) scenario = "income";
       else if (includesAny(source, ["退休","保本","不能跌","低風險"])) scenario = "retirement";
-      else if (includesAny(source, ["集中","重押","台股部位高","科技部位高"])) scenario = "concentration";
+      else if (includesAny(source, ["集中","重押","部位高","單一"])) scenario = "concentration";
       else if (includesAny(source, ["利率","升息","降息","債券"])) scenario = "rates";
       else if (includesAny(source, ["現金很多","定存","等回檔","觀望"])) scenario = "cash";
       else scenario = "growth";
     }
-    var horizon = includesAny(source, ["短期","一年內","兩年內","很快要用"]) ? "短期資金" : includesAny(source, ["十年","長期","五年"]) ? "長期資金" : "期限待確認";
     var selectedFund = funds.filter(function (f) { return f.id === fundId; })[0];
     var alert = "仍需依風險屬性、投資期限、資金用途與法遵規範完成適合度確認。";
-    if (fundId === "taiwan" && holding === "台股") alert = "高度相關性警示：此客戶已有台股部位，新增台灣成長基金可能加重集中風險，必須先設定台股總上限。";
-    else if (fundId === "tech" && (holding === "科技股" || holding === "台股")) alert = "集中度警示：全球科技可能與既有台股／科技持倉重疊，應先檢查半導體與 AI 曝險。";
-    else if (scenario === "income" && selectedFund.metrics.distribution === 0) alert = "級別警示：目前選定的是累積級別，沒有現金配發；不可把它當成配息工具銷售。";
-    else if (scenario === "retirement" && selectedFund.risk === "RR5") alert = "適合度警示：本基金為 RR5，若三年內有生活資金需求，不宜用短期支出資金承擔完整波動。";
+    if (horizon === "0–2 年" && (selectedFund.risk === "RR4" || selectedFund.risk === "RR5")) {
+      alert = "期限警示：0–2 年可能使用的資金，不宜承擔 " + selectedFund.risk + " 股票型基金的完整波動。";
+    } else if (fundId === "taiwan" && holdings.indexOf("台股") >= 0) {
+      alert = "集中度警示：已有台股部位，新增台灣成長基金可能加重單一市場風險，必須先設定台股總上限。";
+    } else if (fundId === "tech" && (holdings.indexOf("科技股") >= 0 || holdings.indexOf("台股") >= 0)) {
+      alert = "重疊警示：全球科技可能與既有台股／科技持倉重疊，應先穿透檢查半導體與 AI 曝險。";
+    } else if (scenario === "income" && selectedFund.metrics.distribution === 0) {
+      alert = "級別警示：選定的是累積級別，沒有現金配發；不可把它當成配息工具銷售。";
+    } else if (scenario === "retirement" && selectedFund.risk === "RR5") {
+      alert = "適合度警示：本基金為 RR5；三年內生活支出不得承擔其完整波動，只能評估長期衛星資金。";
+    } else if (riskTolerance === "低" && (selectedFund.risk === "RR4" || selectedFund.risk === "RR5")) {
+      alert = "風險屬性警示：客戶文字顯示低風險承受度，與 " + selectedFund.risk + " 產品可能不匹配，應先停止銷售並完成適合度確認。";
+    }
+    var signals = [
+      {label:"生命階段",value:lifeStage},
+      {label:"客戶身分",value:persona},
+      {label:"既有重心",value:holding},
+      {label:"核心目標",value:goal},
+      {label:"可用期限",value:horizon},
+      {label:"流動性需求",value:liquidity},
+      {label:"風險承受度",value:riskTolerance},
+      {label:"投資經驗",value:experience}
+    ];
     return {
-      age:age, persona:persona, holding:holding, goal:goal, scenario:scenario, horizon:horizon, alert:alert,
-      summary:(age ? age + "歲 · " : "") + persona + "｜既有 " + holding + "｜目標 " + goal + "｜" + scenarioDefinitions[scenario].label
+      source:source, age:age, amount:amount, lifeStage:lifeStage, persona:persona, holdings:holdings, holding:holding,
+      goal:goal, scenario:scenario, horizon:horizon, liquidity:liquidity, riskTolerance:riskTolerance,
+      experience:experience, alert:alert, signals:signals,
+      summary:(age ? age + "歲 · " : "") + persona + "｜" + lifeStage + "｜既有 " + holding + "｜目標 " + goal + "｜" + scenarioDefinitions[scenario].label
     };
   }
 
+  function clientAdjustments(client, fund) {
+    var items = [];
+    if (client.persona === "企業主") items.push("先把企業營運風險與家庭金融資產分開盤點；新增基金不能再複製公司本業或台股景氣風險。");
+    if (client.lifeStage === "退休準備期") items.push("把三年內確定支出切出安全層，再以剩餘長期資金討論成長部位，避免退休前的報酬順序風險。");
+    if (client.lifeStage === "退休提領期") items.push("先建立十二至三十六個月支出緩衝；任何高波動基金只能使用不影響提領計畫的長期資金。");
+    if (client.holdings.indexOf("台股") >= 0) items.push("用底層持股檢查台灣、半導體與 AI 曝險；基金名稱不同不代表風險來源不同。");
+    if (client.holdings.indexOf("科技股") >= 0) items.push("新增部位必須證明獲利驅動不同，否則只是把同一科技循環換一個包裝。");
+    if (client.holdings.indexOf("現金") >= 0) items.push("替等待設定日期與暫停條件，將現金決策由『等感覺』改為可執行規則。");
+    if (client.horizon === "0–2 年") items.push("短期會用到的資金先排除；只用期限足以承受完整週期的部分評估本基金。");
+    if (client.liquidity === "高") items.push("先列出未來十二個月必要現金需求；累積級別不能假設會自動提供現金流。");
+    if (client.riskTolerance === "低") items.push("先用具體金額確認可接受最大損失；若與 " + fund.risk + " 不相容，流程應停在適合度確認。");
+    if (client.goal.indexOf("海外分散") >= 0) items.push("分散要比較地區、產業、幣別與獲利因子，不以基金檔數作為完成標準。");
+    if (!items.length) items.push("先補齊資金用途、持有期限、可接受回撤與既有曝險，再決定基金角色。");
+    return items.slice(0, 4);
+  }
+
   function makeOpening(profile, scene, client) {
-    var prefix = client.age ? "以您 " + client.age + " 歲、目前以" + client.holding + "為主的情況，" : "從您目前以" + client.holding + "為主的組合來看，";
-    if (state.mode === "故事比喻") return profile.metaphor + " " + prefix + "我們要解決的是：" + scene.tension + "。";
-    if (state.mode === "董事會精準") return profile.board + " 決策限制是：" + scene.avoid + "。";
-    if (state.mode === "蘇格拉底提問") return profile.question + " 接著我會再確認：" + scene.question;
-    if (state.mode === "風險長官") return "我先說不適合的情況：" + profile.guardrail + " 若這條界線可接受，我們才討論它如何" + scene.use + "。";
-    if (state.mode === "兩分鐘成交") return prefix + "先不預測市場；用" + profile.identity + "處理「" + scene.tension + "」，再用一個小而可檢視的下一步執行。";
-    return profile.contrarian + " " + prefix + "真正要處理的不是猜點位，而是" + scene.use + "。";
+    var who = (client.age ? client.age + "歲、" : "") + client.lifeStage + "的" + client.persona;
+    var position = client.holding === "既有部位待確認" ? "既有配置尚待盤點" : "目前以" + client.holding + "為重心";
+    if (state.mode === "故事比喻") return profile.metaphor + " 對一位" + who + "而言，" + position + "，這次不是多買一檔產品，而是替組合安排新的角色。";
+    if (state.mode === "董事會精準") return "決策案：" + profile.board + " 客戶條件：" + who + "、" + position + "；主要限制：" + scene.avoid + "。";
+    if (state.mode === "蘇格拉底提問") return "我先不介紹產品。想先請教：" + profile.question + " 您的答案會決定這檔基金是否有存在必要。";
+    if (state.mode === "風險長官") return "先說結論：若資金期限、損失承受度或流動性不合，本案不應成立。" + profile.guardrail;
+    if (state.mode === "兩分鐘成交") return who + "，" + position + "。我用兩分鐘說清楚一件事：是否需要用「" + profile.identity + "」處理「" + scene.tension + "」。";
+    return "表面上您在問市場時點；真正要決定的是：" + position + "的情況下，是否需要" + scene.use + "。";
+  }
+
+  function objectionStyle(question, answer, pack, index) {
+    var mode = state.mode;
+    if (mode === "故事比喻") return "把這個疑問放回剛才的故事：" + pack.profile.metaphor + " " + answer + " 所以下一步不是猜結局，而是檢查這個角色是否真的補上組合缺口。";
+    if (mode === "董事會精準") return "結論：" + answer + " 通過條件：" + pack.questions[index % pack.questions.length] + " 未通過就不執行。";
+    if (mode === "蘇格拉底提問") return "我不先反駁。想請您先回答：「" + pack.questions[index % pack.questions.length] + "」如果答案顯示現有組合已有同樣功能，就沒有新增的必要；若沒有，再用資料驗證。";
+    if (mode === "風險長官") return "這個疑慮成立，不能淡化。風險界線是：" + pack.boundary + " 在界線內才討論：" + answer;
+    if (mode === "兩分鐘成交") return "短答：" + answer + " 今天只確認角色、上限與下一個檢視點，不做報酬承諾。";
+    return "真正的問題不是「" + question + "」，而是這個選擇是否改善整體組合。" + answer;
+  }
+
+  function composeModeSections(pack) {
+    var c = pack.client;
+    var a = pack.adjustments;
+    var numbers = pack.metricProof;
+    if (state.mode === "故事比喻") return [
+      {title:"場景｜客戶現在站在哪裡",text:(c.age ? c.age + "歲" : "年齡待確認") + "的" + c.persona + "，位於" + c.lifeStage + "，既有重心為" + c.holding + "，希望做到" + c.goal + "。"},
+      {title:"衝突｜兩個都不想失去",text:pack.scene.tension + "；同時還要顧到" + c.horizon + "的資金期限與" + c.liquidity + "流動性需求。"},
+      {title:"角色｜這檔基金負責什麼",text:pack.profile.metaphor + " 在組合裡，它的工作是" + pack.role},
+      {title:"轉折｜用證據而非情緒",text:pack.evidence + " " + numbers},
+      {title:"下一章｜客戶要做的動作",text:a[0] + " " + pack.next},
+      {title:"故事不能越過的線",text:pack.boundary}
+    ];
+    if (state.mode === "董事會精準") return [
+      {title:"決策案",text:pack.profile.board},
+      {title:"採用理由",text:"客戶為" + c.lifeStage + "、目標是" + c.goal + "；本案要處理的是「" + pack.scene.use + "」。" + pack.role},
+      {title:"通過條件",text:pack.questions[0] + " 並確認：" + a[0]},
+      {title:"否決條件",text:pack.scene.avoid + "；若出現以下情況，本案不通過：" + c.alert},
+      {title:"監測 KPI",text:numbers + " 後續以角色達成度、風險上限與檢視條件追蹤，不以單一期績效下結論。"},
+      {title:"決議與負責人",text:pack.next + " 由業務完成資料核對，客戶確認資金用途與可接受回撤後再決定。"}
+    ];
+    if (state.mode === "蘇格拉底提問") return [
+      {title:"第一問｜您真正怕的是什麼？",text:pack.scene.question},
+      {title:"第二問｜現有組合缺哪個功能？",text:pack.profile.diagnostic},
+      {title:"第三問｜期限允許嗎？",text:"這筆資金可用期限是" + c.horizon + "；若先下跌，哪一個生活或事業計畫會被迫改變？"},
+      {title:"第四問｜重疊還是分散？",text:"既有重心是" + c.holding + "。新增後，是增加不同獲利來源，還是再次承擔同一風險？"},
+      {title:"共同結論｜讓答案決定產品",text:"只有當上述答案支持「" + pack.profile.identity + "」確實補上缺口，才進入基金比較。" + pack.role},
+      {title:"最小承諾｜先同意一個動作",text:a[0] + " " + pack.next}
+    ];
+    if (state.mode === "風險長官") return [
+      {title:"先說不適合",text:pack.boundary},
+      {title:"客戶脆弱點",text:"生命階段：" + c.lifeStage + "；期限：" + c.horizon + "；流動性：" + c.liquidity + "；風險承受度：" + c.riskTolerance + "。"},
+      {title:"壓力測試",text:"假設市場先出現一段不利走勢，請回答：" + pack.scene.question},
+      {title:"暴露檢查",text:a.join(" ")},
+      {title:"允許進場的條件",text:"只在資金用途、風險上限與產品角色都可被書面說清楚時評估。" + pack.role},
+      {title:"執行護欄",text:pack.next + " " + numbers}
+    ];
+    if (state.mode === "兩分鐘成交") return [
+      {title:"0–20 秒｜點出真正問題",text:"您是" + c.lifeStage + "的" + c.persona + "，目前" + c.holding + "，真正風險不是錯過一檔基金，而是" + pack.scene.tension + "。"},
+      {title:"20–45 秒｜確認需求",text:pack.questions[0] + " " + pack.questions[1]},
+      {title:"45–75 秒｜一句話產品角色",text:pack.role},
+      {title:"75–100 秒｜只給可核對證據",text:pack.evidence + " " + numbers},
+      {title:"100–115 秒｜先畫風險線",text:pack.boundary},
+      {title:"115–120 秒｜取得下一步",text:pack.next}
+    ];
+    return [
+      {title:"表面問題",text:"客戶說的是「" + pack.scene.label + "」，表面焦慮是：" + pack.scene.tension + "。"},
+      {title:"真正風險",text:"真正風險不是單一點位，而是" + c.holding + "無法支撐「" + c.goal + "」。" + a[0]},
+      {title:"重寫決策",text:"不問『現在會不會漲』，改問：" + pack.questions[0] + " " + pack.role},
+      {title:"用證據推翻直覺",text:pack.evidence + " " + numbers},
+      {title:"不能偷換概念",text:pack.scene.avoid + "；風險界線：" + pack.boundary},
+      {title:"把觀點變成動作",text:pack.next + " " + pack.close}
+    ];
   }
 
   function buildScriptPackage() {
@@ -362,31 +498,36 @@
     var profile = fundNarratives[fund.id];
     var client = analyzeClient(state.client, fund.id, state.scenario);
     var scene = scenarioDefinitions[client.scenario];
-    var metricProof = "公開級別 " + fund.share + "；截至 " + fund.metrics.asOf + "，近一年累積報酬 " + Number(fund.metrics.y1).toFixed(2) + "%、年化標準差 " + Number(fund.metrics.risk).toFixed(2) + "%、夏普值 " + Number(fund.metrics.sharpe).toFixed(2) + "、最高管理年費 " + Number(fund.metrics.expense).toFixed(2) + "%。這些是歷史數字，不是未來承諾。";
+    var metricProof = "公開級別 " + fund.share + "；截至 " + fund.metrics.asOf + "，近一年累積報酬 " + Number(fund.metrics.y1).toFixed(2) + "%、年化標準差 " + Number(fund.metrics.risk).toFixed(2) + "%、夏普值 " + Number(fund.metrics.sharpe).toFixed(2) + "、最高管理年費 " + Number(fund.metrics.expense).toFixed(2) + "%。";
     var role = profile.role + "。在「" + scene.label + "」情境下，它不是用來" + scene.avoid + "，而是用來" + scene.use + "。";
-    if (fund.id === "taiwan" && client.holding === "台股") {
-      role = "這個情境下，" + cleanName(fund.name) + "不能直接被定位成分散工具。只有在它取代既有重複台股部位、而非增加台股總曝險，且能證明選股差異時，才值得進一步比較。";
-    } else if (fund.id === "tech" && (client.holding === "科技股" || client.holding === "台股")) {
-      role = "這個情境下，全球科技不能直接被稱為分散。必須先穿透既有持股，確認新增的是全球軟體、服務或不同獲利來源，而不是再次疊加半導體與 AI 風險。";
+    if (fund.id === "taiwan" && client.holdings.indexOf("台股") >= 0) {
+      role = cleanName(fund.name) + "不能被定位成分散工具；只有在取代重複台股部位、而非增加台股總曝險，且能證明選股差異時才值得評估。";
+    } else if (fund.id === "tech" && (client.holdings.indexOf("科技股") >= 0 || client.holdings.indexOf("台股") >= 0)) {
+      role = "全球科技不能直接稱為分散；必須先穿透既有持股，確認新增的是不同獲利來源，而非再次疊加半導體與 AI 風險。";
     } else if (client.scenario === "income" && fund.metrics.distribution === 0) {
-      role = profile.role + "；但目前選定的 " + fund.share + " 是累積級別，只能以總報酬累積工具討論，不能包裝成現金配息方案。";
+      role = profile.role + "；但 " + fund.share + " 是累積級別，只能以總報酬累積工具討論，不能包裝成現金配息方案。";
     } else if (client.scenario === "retirement" && fund.risk === "RR5") {
-      role = profile.role + "；對退休情境只能放在長期且可承受完整波動的衛星資金，不應動用三年內生活支出。";
+      role = profile.role + "；退休情境只能評估長期衛星資金，不得動用三年內生活支出。";
     }
     var questions = [profile.diagnostic, scene.question];
-    var objections = [
-      {q:scene.objectionQ,a:scene.objectionA + " 對" + cleanName(fund.name) + "而言，核心檢驗是能否完成「" + profile.identity + "」的組合任務。"},
-      {q:"為什麼不直接買 ETF？",a:profile.etf + " 這不是主動一定優於被動，而是要比較費用後是否得到需要的配置差異。"},
-      {q:"競品最近報酬比較好，為什麼還看這檔？",a:profile.peer + " 先對齊級別、幣別、資料日、投資範圍與風險，再談哪一檔更適合；不以單一期績效下勝負結論。"}
-    ];
-    return {
+    var pack = {
       fund:fund, profile:profile, client:client, scene:scene,
-      opening:makeOpening(profile, scene, client),
-      role:role, questions:questions, evidence:scene.market, metricProof:metricProof,
+      opening:makeOpening(profile, scene, client), role:role, questions:questions,
+      evidence:scene.market, metricProof:metricProof,
       next:scene.next, boundary:client.alert + " " + profile.guardrail,
-      close:"如果這個角色符合您的目標，我們今天不必押方向；先完成風險上限與檢視條件，再決定是否納入。",
-      objections:objections
+      close:"如果這個角色符合您的目標，今天先不押方向；先完成風險上限、資金期限與檢視條件，再決定是否納入。"
     };
+    pack.adjustments = clientAdjustments(client, fund);
+    var baseObjections = [
+      {q:scene.objectionQ,a:scene.objectionA + " 對" + cleanName(fund.name) + "而言，核心檢驗是能否完成「" + profile.identity + "」的組合任務。"},
+      {q:"為什麼不直接買 ETF？",a:profile.etf + " 這不是主動一定優於被動，而是比較費用後是否取得需要的配置差異。"},
+      {q:"競品最近報酬比較好，為什麼還看這檔？",a:profile.peer + " 先對齊級別、幣別、資料日、投資範圍與風險，再談適合度；不以單一期績效下勝負結論。"}
+    ];
+    pack.objections = baseObjections.map(function (item, index) {
+      return {q:item.q,a:objectionStyle(item.q, item.a, pack, index)};
+    });
+    pack.sections = composeModeSections(pack);
+    return pack;
   }
 
 
@@ -566,21 +707,32 @@
 
   function fullScript() {
     var pack = buildScriptPackage();
+    var signals = pack.client.signals.map(function (item) { return item.label + "：" + item.value; }).join("｜");
+    var adjustments = pack.adjustments.map(function (item, index) { return (index + 1) + ". " + item; }).join("\n");
+    var sections = pack.sections.map(function (item) { return "【" + item.title + "】\n" + item.text; }).join("\n\n");
+    var objections = pack.objections.map(function (item) { return "Q：" + item.q + "\nA：" + item.a; }).join("\n\n");
     return "【客戶判讀】\n" + pack.client.summary +
+      "\n" + signals +
+      "\n\n【採用框架】\n" + state.mode + "｜" + modeBlueprints[state.mode].journey +
       "\n\n【開場】\n「" + pack.opening + "」" +
-      "\n\n【先問，不先賣】\n1. " + pack.questions[0] + "\n2. " + pack.questions[1] +
-      "\n\n【基金在這個情境的角色】\n" + pack.role +
-      "\n\n【目前市場證據】\n" + pack.evidence +
-      "\n\n【可核對的基金數字】\n" + pack.metricProof +
-      "\n\n【風險界線】\n" + pack.boundary +
-      "\n\n【下一步】\n" + pack.next +
-      "\n\n【收尾】\n" + pack.close +
+      "\n\n" + sections +
+      "\n\n【因客戶條件而改寫】\n" + adjustments +
+      "\n\n【異議處理】\n" + objections +
       "\n\n基金有價格波動及本金損失風險，過去績效不代表未來；實際配置應依客戶適合度與最新公開說明書確認。";
+  }
+
+  function renderSignal(item) {
+    return '<div class="signalItem"><small>' + escapeHtml(item.label) + '</small><b>' + escapeHtml(item.value) + '</b></div>';
+  }
+
+  function renderNarrativeSection(item, index) {
+    return '<section><small>0' + (index + 1) + '</small><h3>' + escapeHtml(item.title) + '</h3><p' + (item.title.indexOf("證據") >= 0 || item.title.indexOf("KPI") >= 0 ? ' class="proofLine"' : '') + '>' + escapeHtml(item.text) + '</p></section>';
   }
 
   function renderScript() {
     var fund = currentFund();
     var pack = buildScriptPackage();
+    var blueprint = modeBlueprints[state.mode];
     var fundOptions = options(funds, fund.id, "id", function (f) { return f.name; });
     var scenarioOptions = Object.keys(scenarioDefinitions).map(function (scenario) {
       return '<option value="' + scenario + '"' + (scenario === state.scenario ? " selected" : "") + '>' + scenarioDefinitions[scenario].label + '</option>';
@@ -588,22 +740,22 @@
     var modeOptions = Object.keys(frames).map(function (mode) {
       return '<option value="' + mode + '"' + (mode === state.mode ? " selected" : "") + '>' + mode + '</option>';
     }).join("");
+    var signalGrid = pack.client.signals.map(renderSignal).join("");
+    var adjustmentList = pack.adjustments.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join("");
+    var narrativeSections = pack.sections.map(renderNarrativeSection).join("");
     var output = state.generated ?
-      '<div class="clientRead"><small>CLIENT SIGNALS</small><b>' + pack.client.summary + '</b><p>系統依輸入文字辨識主要情境；可用左側選單覆寫。</p></div>' +
-      '<blockquote>「' + pack.opening + '」</blockquote>' +
-      '<div class="talkGrid"><section><h3>先問，不先賣</h3><ol><li>' + pack.questions[0] + '</li><li>' + pack.questions[1] + '</li></ol></section>' +
-      '<section><h3>基金在此情境的角色</h3><p>' + pack.role + '</p></section>' +
-      '<section><h3>最新市場證據</h3><p>' + pack.evidence + '</p></section>' +
-      '<section><h3>可核對的基金數字</h3><p class="proofLine">' + pack.metricProof + '</p></section>' +
-      '<section><h3>不靠預測的下一步</h3><p>' + pack.next + '</p></section>' +
-      '<section><h3>顧問式收尾</h3><p>' + pack.close + '</p></section></div>' +
-      '<div class="guardrail"><strong>風險界線</strong><p>' + pack.boundary + '</p></div>' :
+      '<div class="narrativeBlueprint"><div><small>SELECTED BLUEPRINT</small><b>' + escapeHtml(state.mode) + '</b></div><span>' + escapeHtml(blueprint.journey) + '</span></div>' +
+      '<div class="clientRead"><small>CLIENT SIGNALS · 實際改寫依據</small><b>' + escapeHtml(pack.client.summary) + '</b><div class="signalGrid">' + signalGrid + '</div></div>' +
+      '<div class="personalization"><small>WHY THIS VERSION IS DIFFERENT</small><h3>因這位客戶的條件，話術已作以下調整</h3><ol>' + adjustmentList + '</ol></div>' +
+      '<blockquote>「' + escapeHtml(pack.opening) + '」</blockquote>' +
+      '<div class="talkGrid" data-blueprint="' + escapeHtml(state.mode) + '">' + narrativeSections + '</div>' +
+      '<div class="guardrail"><strong>最終風險界線</strong><p>' + escapeHtml(pack.boundary) + '</p></div>' :
       '<div class="empty"><span>✦</span><h3>等待產生話術</h3><p>基金、客戶文字、主要情境與創意切角會共同改變完整對話。</p></div>';
     return '<div class="page">' + title("CONVERSATION LAB", "話術實驗室", "同一檔基金，面對不同客戶與情境，不應說同一套話。") +
       '<section class="marketNote"><small>LIVE MARKET CONTEXT · ' + market.asOf + '</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達 9/7 市場週報 ↗</a><a href="' + market.secondary + '" target="_blank" rel="noopener noreferrer">2026 全球投資人研究 ↗</a></div></section>' +
-      '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT BRIEF</small><h2>建立客戶情境</h2><label>客戶描述<textarea id="clientText" placeholder="例如：55歲企業主，台股與公司資產高度相關，希望增加海外配置，但怕追高。">' + escapeHtml(state.client) + '</textarea></label><label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>主要情境<select id="scenarioSelect">' + scenarioOptions + '</select></label><small class="scenarioHint">選擇「自動判讀」時，會依客戶文字辨識主要問題；也可手動指定。</small><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><button id="generateScript">產生專屬話術 →</button></section>' +
-      '<section class="card output ' + (state.generated ? "ready" : "") + '"><div class="cardHead"><div><small>02 / SALES NARRATIVE</small><h2>客製對話框架</h2></div>' + (state.generated ? '<button data-copy="' + escapeHtml(fullScript()) + '">複製全文</button>' : "") + '</div>' + output + '</section></div>' +
-      '<section class="objections"><div class="sectionHead"><div><small>OBJECTION HANDLING</small><h2>' + cleanName(fund.name) + '｜' + pack.scene.label + '</h2></div></div><div>' +
+      '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT BRIEF</small><h2>建立客戶情境</h2><label>客戶描述<textarea id="clientText" placeholder="例如：55歲企業主，台股與公司資產高度相關，希望增加海外配置，但怕追高。">' + escapeHtml(state.client) + '</textarea></label><label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>主要情境<select id="scenarioSelect">' + scenarioOptions + '</select></label><small class="fieldInsight"><b>' + escapeHtml(pack.scene.label) + '</b>' + escapeHtml(pack.scene.tension) + '</small><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><small class="fieldInsight modeInsight"><b>' + escapeHtml(state.mode) + '</b>' + escapeHtml(blueprint.tone) + '<em>' + escapeHtml(blueprint.journey) + '</em></small><button id="generateScript">產生專屬話術 →</button><p class="formPromise">每個欄位都會改變論證順序、段落名稱、問題、異議回答與下一步。</p></section>' +
+      '<section class="card output ' + (state.generated ? "ready" : "") + '"><div class="cardHead"><div><small>02 / SALES NARRATIVE</small><h2>' + (state.generated ? escapeHtml(state.mode) + '對話稿' : '客製對話框架') + '</h2></div>' + (state.generated ? '<button data-copy="' + escapeHtml(fullScript()) + '">複製全文</button>' : "") + '</div>' + output + '</section></div>' +
+      '<section class="objections"><div class="sectionHead"><div><small>OBJECTION HANDLING · ' + escapeHtml(state.mode) + '</small><h2>' + cleanName(fund.name) + '｜' + pack.scene.label + '</h2><p>回答語氣與推進方式也會依切角重寫，不只替換基金名稱。</p></div></div><div>' +
       pack.objections.map(function (item) { return objection(item.q, item.a); }).join("") +
       '</div></section></div>';
   }
