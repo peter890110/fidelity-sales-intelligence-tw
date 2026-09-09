@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var auditDate = "2026/09/08";
+  var auditDate = "2026/09/09";
   var fidelitySource = "https://www.fidelity.com.tw/fund-and-service/fundui/funds/?grouping=%24fundRangeCode&intcmp=menu_ws_fund-and-service_sep_2022";
   var funds = [
     {id:"japan",name:"富達基金－日本價值基金",en:"Fidelity Japan Value Fund",share:"A2股日圓",asset:"股票型",theme:"日本價值",risk:"RR4",nav:"11,531.2000 日圓",navDate:"2026/09/03",y1:40.58,y3:91.92,perfDate:"2026/09/03",thesis:"公司治理改革、資本效率提升與價值重估構成長期選股脈絡。",role:"降低純科技成長曝險，補進日本企業改革紅利",source:"https://www.moneydj.com/funddj/yp/yp012001.djhtm?a=FTZA66",metrics:{asOf:"2026/09/03",y1:40.58,risk:18.48,distribution:0.02,distributionDate:"2026/07/31",expense:1.50,sharpe:0.55,distributionNote:"最新年化配息率（年配）",perfSource:"https://www.moneydj.com/funddj/yp/yp012001.djhtm?a=FTZA66",basicSource:"https://www.moneydj.com/funddj/yp/yp011001.djhtm?a=FTZA66",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=FTZA66"}},
@@ -68,10 +68,11 @@
   };
 
   var market = {
-    title:"AI 與企業獲利延續支撐，但通膨、政策與區域分化仍高",
-    body:"富達 2026 年 8 月資產配置觀點維持選擇性加碼股票，並強調主動管理與精選標的；美國聯準會官員 9 月 3 日表示，政策仍高度依賴即將公布的通膨資料。銷售對話應從「猜高點」轉向「配置角色與分批節奏」。",
-    source:"https://www.fidelity.com.tw/insights-learning/market-insights/global-asset-allocation-2608/",
-    fed:"https://www.federalreserve.gov/newsevents/speech/waller20260903a.htm"
+    asOf:"2026/09/07",
+    title:"就業轉強、成長動能略降；股票仍偏正向，但風險預算更重要",
+    body:"富達 9 月 7 日市場週報指出，多重資產觀點仍維持股票加碼，但因領先指標顯示成長動能降溫而略為降低部位；企業獲利仍具韌性，日本與亞洲表現穩健，AI 資本支出持續支撐經濟活動。短期波動可能偏高，政策方向仍取決於後續通膨資料。",
+    source:"https://www.fidelity.com.tw/insights-learning/market-insights/weekly-economic-insight-20260907/",
+    secondary:"https://www.fidelity.com.tw/insights-learning/market-insights/be-invested-global-study/"
   };
 
   var state = {
@@ -79,6 +80,7 @@
     fundId:"japan",
     peerName:"",
     client:"55 歲企業主，台股部位高，希望增加海外資產，但擔心市場估值偏高。",
+    scenario:"auto",
     mode:"反直覺破題",
     generated:false,
     query:""
@@ -111,11 +113,273 @@
   }
 
   var frames = {
-    "反直覺破題":"市場很高時，最大的風險未必是開始投資，而是讓原有風險繼續高度集中。",
-    "故事比喻":"投資組合像一支球隊：明星前鋒再強，也不能九個位置都放前鋒。",
-    "董事會精準":"今天不預測高點，只做一個決策：要不要降低單一風險來源對總資產的支配力。",
-    "蘇格拉底提問":"如果未來一年市場不照任何人的劇本走，您希望組合靠什麼繼續前進？"
+    "反直覺破題":"翻轉客戶原本的問題，再把焦點拉回組合。",
+    "故事比喻":"用基金專屬比喻說明配置角色。",
+    "董事會精準":"用決策語言說清楚目的、限制與下一步。",
+    "蘇格拉底提問":"先問出真正風險，再談產品。",
+    "風險長官":"先揭露不適合條件，再說明如何使用。",
+    "兩分鐘成交":"用最短路徑完成診斷、證據與下一步。"
   };
+
+  var scenarioDefinitions = {
+    auto:{label:"自動判讀客戶文字"},
+    valuation:{
+      label:"市場估值偏高／怕追高",
+      tension:"怕現在買在高點，但也不想讓資金與既有部位原地不動",
+      use:"把一次性的高點判斷，改成可管理的配置角色與分批決策",
+      avoid:"把近一年高報酬直接外推成未來保證",
+      market:"富達 9 月 7 日週報仍維持股票加碼，但已因成長動能降溫而略為降低部位；這支持「保留參與、降低單點判斷」，而不是全進或全退。",
+      question:"如果市場先回檔再上漲，您比較不能接受的是短期帳面下跌，還是完全沒有參與？",
+      next:"先定義可承受的最大回撤與資金使用期限，再把預算拆成三個檢視點；每次只在條件仍成立時執行。",
+      objectionQ:"現在是不是已經太高？",
+      objectionA:"沒有人能可靠鎖定高點。較可控的做法是先決定資金在整體組合的角色、可承受損失與分批規則。"
+    },
+    concentration:{
+      label:"持股過度集中／需要分散",
+      tension:"既有資產已經靠同一產業或市場賺很多，真正風險是單一劇本失效",
+      use:"加入不同的獲利來源，降低單一市場對總資產的支配力",
+      avoid:"只因基金名稱不同就誤以為已經分散",
+      market:"富達最新週報指出區域機會正在轉移，日本與亞洲企業獲利仍具韌性；分散應看獲利驅動是否不同，而不只是基金檔數。",
+      question:"若您最大的持股明年橫盤，組合中哪一部分仍能靠不同的企業獲利來源前進？",
+      next:"先把現有持股按國家、產業與獲利驅動重新分組，再設定新增部位不得重複前三大風險來源。",
+      objectionQ:"我手上的基金已經很多，還不夠分散嗎？",
+      objectionA:"基金數量不等於風險來源數量。要看底層市場、產業與獲利因子是否仍高度重疊。"
+    },
+    income:{
+      label:"現金流／配息需求",
+      tension:"需要穩定支應生活或支出，但不能只看表面配息率",
+      use:"先分清楚總報酬、收益來源與實際配息級別，再安排現金流",
+      avoid:"把配息當成額外報酬，或忽略配息可能來自本金",
+      market:"最新富達觀點認為信用利差仍偏低，收益資產不能只追逐較高票息；現金流規劃需同時檢查信用風險、波動與總報酬。",
+      question:"您要的是每月固定入帳，還是三到五年後資產仍有足夠購買力？兩者需要不同級別與配置。",
+      next:"先列出未來十二個月必要支出，再確認產品級別是否實際配息；其餘資金才用總報酬與風險效率比較。",
+      objectionQ:"配息越高是不是越好？",
+      objectionA:"不是。配息可能來自收益、資本利得或本金；必須把配息率、淨值變化與總報酬一起看。"
+    },
+    retirement:{
+      label:"退休前後／重視下檔",
+      tension:"需要讓資產繼續工作，但短期大幅回撤會影響生活計畫",
+      use:"用損失預算決定部位上限，讓成長與防禦各自有明確任務",
+      avoid:"用長期故事掩蓋短期資金用途",
+      market:"富達最新週報預期短期波動可能偏高；退休情境下，比預測方向更重要的是保留生活預備金、控制波動來源並定期再平衡。",
+      question:"未來三年內確定要用的錢有多少？那一段資金不應承擔股票型基金的完整波動。",
+      next:"先把三年內支出與緊急預備金隔離，再由剩餘長期資金設定核心／衛星上限與半年檢視規則。",
+      objectionQ:"我快退休了，還能承受這檔基金嗎？",
+      objectionA:"要先看三年內現金需求與可接受回撤；不能因基金故事吸引，就讓短期生活資金承擔不相稱的波動。"
+    },
+    rates:{
+      label:"利率方向不明／債券疑慮",
+      tension:"不確定政策下一步，擔心存續期間或信用風險押錯方向",
+      use:"把利率、信用與股債相關性的風險拆開管理",
+      avoid:"把所有債券或多重資產都視為同一種防禦工具",
+      market:"富達 9 月 7 日週報指出政策仍取決於通膨資料，殖利率上升提高存續期間吸引力，但股債若維持正相關，傳統分散效果可能下降。",
+      question:"您真正擔心的是利率上升造成價格波動，還是景氣轉弱造成信用利差擴大？",
+      next:"用利率上升、利率下降與信用利差擴大三種情境，檢查產品應扮演收益、避震或總報酬哪一個角色。",
+      objectionQ:"現在利率方向不明，為什麼要動？",
+      objectionA:"正因方向不明，才不該只押一個利率劇本；先拆開存續期間與信用曝險，再決定部位。"
+    },
+    cash:{
+      label:"現金很多／一直等回檔",
+      tension:"等待更便宜的價格很合理，但沒有執行規則容易變成永久觀望",
+      use:"把「等感覺」改成有日期、有條件、有上限的部署計畫",
+      avoid:"因害怕錯過而一次投入全部現金",
+      market:"富達最新觀點仍偏正向但承認成長動能降溫與短期波動；這更適合條件式分批，而不是二選一。",
+      question:"若市場未來六個月沒有出現您期待的回檔，這筆現金要到什麼日期才必須重新做決定？",
+      next:"設定三個投入日期與兩個暫停條件；未觸發暫停時按紀律執行，不靠當天新聞決定。",
+      objectionQ:"我想再等一次大跌，可以嗎？",
+      objectionA:"可以保留等待資金，但需要截止日與重新評估條件，否則現金本身也承擔通膨與錯失參與的風險。"
+    },
+    growth:{
+      label:"長期增值／尋找成長引擎",
+      tension:"願意承受波動換取長期成長，但需要知道自己買的是哪一條獲利路徑",
+      use:"把成長來源、持有期限與可接受回撤寫成可檢查的投資假設",
+      avoid:"只因題材熱門或近期績效亮眼而進場",
+      market:"富達最新週報認為企業獲利仍具韌性，AI 資本支出持續支撐活動，日本與亞洲表現穩健；成長機會存在，但區域與產業選擇更重要。",
+      question:"您願意用幾年的時間等待這條企業獲利路徑兌現？若一年內反向波動，什麼條件才算原假設失效？",
+      next:"先寫下持有年限、最大可接受回撤與兩項基本面檢視條件，再決定它是核心或衛星部位。",
+      objectionQ:"近一年漲很多，現在還有成長空間嗎？",
+      objectionA:"近期績效只證明過去發生過什麼；是否值得持有，要回到未來獲利驅動、估值與您能承受的波動。"
+    }
+  };
+
+  var fundNarratives = {
+    japan:{
+      identity:"日本企業治理改革與價值重估",
+      contrarian:"日本價值的重點不是日經指數還能漲多少，而是企業把閒置資本轉回股東價值的速度。",
+      metaphor:"把它想成一座正在整修的老旅館：真正價值是資產效率與經營紀律被重新打開。",
+      board:"新增這檔基金的目的，是用日本企業改革這條獲利路徑，降低既有科技與台股風險的支配力。",
+      question:"如果台灣科技供應鏈休息一年，您是否願意讓日本企業資本效率改善成為第二條引擎？",
+      role:"以日本價值股與企業治理改革，建立不同於純科技成長的海外股票曝險",
+      diagnostic:"您想分散的是台幣與地區，還是台股科技循環本身？兩者需要不同的日本配置。",
+      guardrail:"本基金為 RR4 股票型；日圓、景氣循環與價值風格都可能造成波動，不適合短期要用的資金。",
+      etf:"日本 ETF 提供市場平均曝險；這檔基金的命題是主動辨識資本效率與治理改善，應以費用後風險調整結果檢驗。",
+      peer:"日本基金風格差異很大；先分清價值、動能與大型均衡，再比較同幣別績效。"
+    },
+    bond:{
+      identity:"全球債券收益與波動緩衝",
+      contrarian:"債券的任務不是永遠上漲，而是在股票不配合時，讓組合仍有收益來源與可調整空間。",
+      metaphor:"它更像避震器，不是引擎；好不好不能只看速度，而要看路況變差時整台車是否仍可控。",
+      board:"新增這檔基金的目的，是建立全球債券收益與緩衝來源，而不是對單一降息時點下注。",
+      question:"若股票回檔而利率仍高，您希望債券部位提供收益、資本利得，還是再平衡資金？",
+      role:"透過全球配置、信用研究與存續期間管理，補進股票部位之外的收益與緩衝",
+      diagnostic:"您需要的是低波動核心，還是願意承擔較高信用風險以追求較高收益？",
+      guardrail:"本基金為 RR3，仍有利率、信用、匯率與非投資等級債風險；A 累積美元級別不直接配發現金。",
+      etf:"債券 ETF 的規則透明；主動策略的價值要看能否在存續期間、地區與信用選擇上改善風險報酬。",
+      peer:"策略收益債、美國收益債與全球優質債並非同一風險；需先拆開信用等級、地區與幣別。"
+    },
+    momentum:{
+      identity:"跨資產動態調整",
+      contrarian:"真正的動能配置不是追漲，而是承認不同資產的領先順序會改變，預先保留換檔權。",
+      metaphor:"它像自動變速箱：價值不在永遠用最高檔，而在路況改變時能否及時換檔。",
+      board:"新增這檔基金的目的，是把部分資產切換工作交給跨資產框架，避免每次都由客戶猜市場。",
+      question:"您希望自己決定每次股債切換，還是讓一個明確的跨資產流程持續調整風險？",
+      role:"用單一部位取得股票、債券與其他資產之間的動態調整能力",
+      diagnostic:"您偏好穩定收益，還是容許配置主動偏移以爭取總報酬？",
+      guardrail:"動態配置不代表保本，也可能在轉折初期判斷落後；應以完整週期與風險預算評估。",
+      etf:"單一 ETF 只能固定取得一類曝險；可用多檔 ETF 自行再平衡，但需要持續判斷與執行紀律。",
+      peer:"多重資產競品有收益型與動態型之分；不要只用近一年報酬跨類別排名。"
+    },
+    income:{
+      identity:"全球多重資產收益",
+      contrarian:"收益型投資最容易被配息率誤導；真正要管理的是配息後，資產淨值與購買力還剩多少。",
+      metaphor:"它像一座有多種租戶的商場：重點不是某一家付最高租金，而是來源能否分散且資產維持價值。",
+      board:"新增這檔基金的目的，是把收益來源分散到不同資產，而不是追逐單一高息證券。",
+      question:"您要的是帳戶固定入帳，還是讓收益在基金內累積？目前選定的 A 累積級別屬於後者。",
+      role:"以跨資產方式尋找多元收益來源，兼顧資本增值與下檔管理",
+      diagnostic:"現金流金額、頻率與期間各是多少？若沒有這三個數字，就無法判斷級別是否合適。",
+      guardrail:"目前比較的是 A 累積美元級別，沒有現金配發；需要入帳者必須另核對配息級別及配息來源。",
+      etf:"高股息或債券 ETF 可提供規則型收益；此策略的差異在跨資產配置，仍要用總報酬與波動檢驗。",
+      peer:"比較收益基金時，先分清累積與配息級別，再比較總報酬、波動、信用與股票比重。"
+    },
+    sustainable:{
+      identity:"全球品質股息與永續",
+      contrarian:"存股不是找最高殖利率，而是找有能力在景氣變化中維持現金流與資本紀律的企業。",
+      metaphor:"它像挑發電廠：不是看今天輸出最大，而是看燃料、設備與治理能否讓電力長期穩定。",
+      board:"新增這檔基金的目的，是用全球品質與股息韌性，降低純科技成長對組合的影響。",
+      question:"如果高股息來自基本面惡化造成的股價下跌，您還會把它視為收入優勢嗎？",
+      role:"聚焦具品質、股息韌性與永續特徵的全球企業，補足成長股集中",
+      diagnostic:"您要的是實際現金入帳、較穩定的股息企業，還是 ESG 特徵？三者不能混為一談。",
+      guardrail:"本基金仍是 RR4 股票型；A 累積級別不直接配息，股息策略也可能落後快速上漲的成長市場。",
+      etf:"股息 ETF 依規則篩選；主動策略把企業品質、股息韌性與永續特徵一起納入，需檢查費用後結果。",
+      peer:"系統化收益成長與全球股息股票策略不同，應先確認股票比重與收益來源。"
+    },
+    tech:{
+      identity:"全球科技創新",
+      contrarian:"投資科技最危險的不是錯過一個熱門名字，而是把題材熱度誤認成可持續的企業獲利。",
+      metaphor:"它像投資整套技術堆疊，而不是只押聚光燈下的一顆晶片；價值來自誰能把研發轉成現金流。",
+      board:"新增這檔基金的目的，是取得全球科技創新，而不是把既有台灣半導體曝險再複製一次。",
+      question:"您的台股或美股部位已有多少 AI 與半導體？新增後得到的是分散，還是更集中？",
+      role:"透過全球科技選股參與 AI、軟體、半導體與數位轉型的企業獲利",
+      diagnostic:"您真正缺少的是全球軟體與服務，還是其實已高度集中在半導體硬體？",
+      guardrail:"本基金為 RR4 科技股票型，產業集中與估值修正可能帶來大幅波動；不適合作為短期現金替代。",
+      etf:"科技 ETF 提供規則型產業曝險；主動選股是否值得付費，要看能否改善費用後風險調整結果。",
+      peer:"全球科技與美國科技並非完全同類；比較時必須標示地區與計價幣別差異。"
+    },
+    asia:{
+      identity:"亞洲結構性成長",
+      contrarian:"亞洲不是單一市場；真正機會來自國家、產業與企業分化，而不是押一個亞洲指數方向。",
+      metaphor:"它像一組港口航線：台灣、韓國、印度與東南亞各有不同貨物與景氣，不能只看一個潮位。",
+      board:"新增這檔基金的目的，是把成長來源從單一美國或台灣市場，擴展到亞洲不同企業週期。",
+      question:"您想補的是亞洲消費、供應鏈，還是數位化？若答案不清楚，容易與既有台股重疊。",
+      role:"從亞洲供應鏈、消費升級與數位化中尋找結構性成長",
+      diagnostic:"現有台股部位已涵蓋哪些亞洲供應鏈？新增基金後的非台灣曝險才是真正分散。",
+      guardrail:"本基金為 RR5 股票型，國家、政策、匯率與新興市場波動較高，需要較長持有期。",
+      etf:"亞洲 ETF 取得區域平均；主動策略著重跨國分化與企業選擇，應檢查集中度與費用後結果。",
+      peer:"亞洲股票與新興亞洲範圍不同，成熟亞洲與國家權重需要先對齊。"
+    },
+    taiwan:{
+      identity:"台灣主動成長選股",
+      contrarian:"對已重押台股的客戶，最專業的答案可能不是再買一檔台股基金，而是先證明它帶來的新風險來源足夠不同。",
+      metaphor:"它像在熟悉的主場挑選更好的先發名單；但若整個資產都在同一球場，換球員不等於換風險。",
+      board:"新增這檔基金的目的，是主動掌握台灣成長企業；前提是台股總上限仍符合風險預算。",
+      question:"新增後，台股占可投資資產會到多少？若市場回檔三成，是否影響公司與家庭現金流？",
+      role:"主動選擇台灣具成長性與競爭力的企業，掌握產業升級",
+      diagnostic:"您是要優化既有台股部位，還是增加台股總曝險？這是兩個完全不同的決策。",
+      guardrail:"本基金為 RR4 台股股票型；若已有高台股或企業資產曝險，可能增加而非降低集中風險。",
+      etf:"台股 ETF 提供市場或因子曝險；主動基金的價值要以選股差異、集中度與費用後風險效率證明。",
+      peer:"台灣科技、一般股票與 5G 主題的集中度不同，不能只以報酬率排序。"
+    },
+    em:{
+      identity:"全球新興市場分化",
+      contrarian:"新興市場不是一筆風險交易，而是一組政策、貨幣與企業週期不同的國家。",
+      metaphor:"它像一籃正在轉型的城市：有的靠製造、有的靠消費、有的靠資源，不能用同一張地圖判斷。",
+      board:"新增這檔基金的目的，是取得成熟市場之外的成長來源，同時把國家與政策風險控制在衛星部位。",
+      question:"您願意承受多大的匯率與政策波動，來換取成熟市場之外的成長機會？",
+      role:"以在地研究辨識新興市場的國家、產業與企業差異，增加結構性成長來源",
+      diagnostic:"您要的是美元走弱受惠、亞洲科技，還是更廣泛的新興市場消費？不同答案代表不同曝險。",
+      guardrail:"本基金為 RR5 股票型，匯率、政策、流動性與公司治理風險較高，適合作為受控的長期衛星部位。",
+      etf:"新興市場 ETF 容易被大型國家權重主導；主動策略的價值在國家與企業選擇，仍需用費用後結果驗證。",
+      peer:"同類新興市場基金也可能有顯著國家偏離；比較前需看區域與產業權重。"
+    }
+  };
+
+  function includesAny(text, words) {
+    return words.some(function (word) { return text.indexOf(word) >= 0; });
+  }
+
+  function analyzeClient(text, fundId, selectedScenario) {
+    var source = String(text || "").replace(/\s+/g, " ");
+    var ageMatch = source.match(/(\d{2})\s*歲/);
+    var age = ageMatch ? Number(ageMatch[1]) : null;
+    var persona = includesAny(source, ["企業主","老闆","公司"]) ? "企業主" : includesAny(source, ["退休","退休族"]) ? "退休規劃族" : includesAny(source, ["工程師","上班族","受薪"]) ? "受薪投資人" : "投資人";
+    var holding = includesAny(source, ["台股","台積電","台灣股票"]) ? "台股" : includesAny(source, ["科技","半導體","AI"]) ? "科技股" : includesAny(source, ["美股","S&P","納斯達克"]) ? "美股" : includesAny(source, ["現金","定存"]) ? "現金" : includesAny(source, ["債券","債"]) ? "債券" : "現有部位";
+    var goal = includesAny(source, ["配息","現金流","收益","領息"]) ? "現金流" : includesAny(source, ["退休","保本","穩健"]) ? "退休穩健" : includesAny(source, ["海外","分散","全球"]) ? "海外分散" : includesAny(source, ["成長","增值","報酬"]) ? "長期增值" : "提升組合效率";
+    var scenario = selectedScenario;
+    if (!scenario || scenario === "auto") {
+      if (includesAny(source, ["高點","估值","太高","追高","泡沫"])) scenario = "valuation";
+      else if (includesAny(source, ["配息","現金流","收益","領息"])) scenario = "income";
+      else if (includesAny(source, ["退休","保本","不能跌","低風險"])) scenario = "retirement";
+      else if (includesAny(source, ["集中","重押","台股部位高","科技部位高"])) scenario = "concentration";
+      else if (includesAny(source, ["利率","升息","降息","債券"])) scenario = "rates";
+      else if (includesAny(source, ["現金很多","定存","等回檔","觀望"])) scenario = "cash";
+      else scenario = "growth";
+    }
+    var horizon = includesAny(source, ["短期","一年內","兩年內","很快要用"]) ? "短期資金" : includesAny(source, ["十年","長期","五年"]) ? "長期資金" : "期限待確認";
+    var selectedFund = funds.filter(function (f) { return f.id === fundId; })[0];
+    var alert = "仍需依風險屬性、投資期限、資金用途與法遵規範完成適合度確認。";
+    if (fundId === "taiwan" && holding === "台股") alert = "高度相關性警示：此客戶已有台股部位，新增台灣成長基金可能加重集中風險，必須先設定台股總上限。";
+    else if (fundId === "tech" && (holding === "科技股" || holding === "台股")) alert = "集中度警示：全球科技可能與既有台股／科技持倉重疊，應先檢查半導體與 AI 曝險。";
+    else if (scenario === "income" && selectedFund.metrics.distribution === 0) alert = "級別警示：目前選定的是累積級別，沒有現金配發；不可把它當成配息工具銷售。";
+    else if (scenario === "retirement" && selectedFund.risk === "RR5") alert = "適合度警示：本基金為 RR5，若三年內有生活資金需求，不宜用短期支出資金承擔完整波動。";
+    return {
+      age:age, persona:persona, holding:holding, goal:goal, scenario:scenario, horizon:horizon, alert:alert,
+      summary:(age ? age + "歲 · " : "") + persona + "｜既有 " + holding + "｜目標 " + goal + "｜" + scenarioDefinitions[scenario].label
+    };
+  }
+
+  function makeOpening(profile, scene, client) {
+    var prefix = client.age ? "以您 " + client.age + " 歲、目前以" + client.holding + "為主的情況，" : "從您目前以" + client.holding + "為主的組合來看，";
+    if (state.mode === "故事比喻") return profile.metaphor + " " + prefix + "我們要解決的是：" + scene.tension + "。";
+    if (state.mode === "董事會精準") return profile.board + " 決策限制是：" + scene.avoid + "。";
+    if (state.mode === "蘇格拉底提問") return profile.question + " 接著我會再確認：" + scene.question;
+    if (state.mode === "風險長官") return "我先說不適合的情況：" + profile.guardrail + " 若這條界線可接受，我們才討論它如何" + scene.use + "。";
+    if (state.mode === "兩分鐘成交") return prefix + "先不預測市場；用" + profile.identity + "處理「" + scene.tension + "」，再用一個小而可檢視的下一步執行。";
+    return profile.contrarian + " " + prefix + "真正要處理的不是猜點位，而是" + scene.use + "。";
+  }
+
+  function buildScriptPackage() {
+    var fund = currentFund();
+    var profile = fundNarratives[fund.id];
+    var client = analyzeClient(state.client, fund.id, state.scenario);
+    var scene = scenarioDefinitions[client.scenario];
+    var metricProof = "公開級別 " + fund.share + "；截至 " + fund.metrics.asOf + "，近一年累積報酬 " + Number(fund.metrics.y1).toFixed(2) + "%、年化標準差 " + Number(fund.metrics.risk).toFixed(2) + "%、夏普值 " + Number(fund.metrics.sharpe).toFixed(2) + "、最高管理年費 " + Number(fund.metrics.expense).toFixed(2) + "%。這些是歷史數字，不是未來承諾。";
+    var role = profile.role + "。在「" + scene.label + "」情境下，它不是用來" + scene.avoid + "，而是用來" + scene.use + "。";
+    var questions = [profile.diagnostic, scene.question];
+    var objections = [
+      {q:scene.objectionQ,a:scene.objectionA + " 對" + cleanName(fund.name) + "而言，核心檢驗是能否完成「" + profile.identity + "」的組合任務。"},
+      {q:"為什麼不直接買 ETF？",a:profile.etf + " 這不是主動一定優於被動，而是要比較費用後是否得到需要的配置差異。"},
+      {q:"競品最近報酬比較好，為什麼還看這檔？",a:profile.peer + " 先對齊級別、幣別、資料日、投資範圍與風險，再談哪一檔更適合；不以單一期績效下勝負結論。"}
+    ];
+    return {
+      fund:fund, profile:profile, client:client, scene:scene,
+      opening:makeOpening(profile, scene, client),
+      role:role, questions:questions, evidence:scene.market, metricProof:metricProof,
+      next:scene.next, boundary:client.alert + " " + profile.guardrail,
+      close:"如果這個角色符合您的目標，我們今天不必押方向；先完成風險上限與檢視條件，再決定是否納入。",
+      objections:objections
+    };
+  }
+
 
   function currentFund() {
     return funds.filter(function (f) { return f.id === state.fundId; })[0];
@@ -292,27 +556,46 @@
   }
 
   function fullScript() {
-    var fund = currentFund();
-    return "「" + frames[state.mode] + "」\n\n我理解您的擔心。" + market.body + "\n\n" + fund.name + "要扮演的不是『下一檔一定上漲的基金』，而是" + fund.role + "。" + fund.thesis + "\n\n我們不需要一次判斷完市場；可以先設定符合承受度的起始比例，再用分批與固定檢視條件執行。基金仍有波動與本金損失風險，實際配置應依客戶投資期限與風險屬性調整。";
+    var pack = buildScriptPackage();
+    return "【客戶判讀】\n" + pack.client.summary +
+      "\n\n【開場】\n「" + pack.opening + "」" +
+      "\n\n【先問，不先賣】\n1. " + pack.questions[0] + "\n2. " + pack.questions[1] +
+      "\n\n【基金在這個情境的角色】\n" + pack.role +
+      "\n\n【目前市場證據】\n" + pack.evidence +
+      "\n\n【可核對的基金數字】\n" + pack.metricProof +
+      "\n\n【風險界線】\n" + pack.boundary +
+      "\n\n【下一步】\n" + pack.next +
+      "\n\n【收尾】\n" + pack.close +
+      "\n\n基金有價格波動及本金損失風險，過去績效不代表未來；實際配置應依客戶適合度與最新公開說明書確認。";
   }
 
   function renderScript() {
     var fund = currentFund();
+    var pack = buildScriptPackage();
     var fundOptions = options(funds, fund.id, "id", function (f) { return f.name; });
+    var scenarioOptions = Object.keys(scenarioDefinitions).map(function (scenario) {
+      return '<option value="' + scenario + '"' + (scenario === state.scenario ? " selected" : "") + '>' + scenarioDefinitions[scenario].label + '</option>';
+    }).join("");
     var modeOptions = Object.keys(frames).map(function (mode) {
       return '<option value="' + mode + '"' + (mode === state.mode ? " selected" : "") + '>' + mode + '</option>';
     }).join("");
     var output = state.generated ?
-      '<blockquote>「' + frames[state.mode] + '」</blockquote><h3>市場證據</h3><p>' + market.body + '</p><h3>產品角色</h3><p>' + fund.role + '。' + fund.thesis + '</p><h3>不靠預測的下一步</h3><p>先設定符合承受度的起始比例，再用分批與固定檢視條件執行。</p>' :
-      '<div class="empty"><span>✦</span><h3>等待產生話術</h3><p>四種切角會改變問題定義與論證順序，不只是替換用字。</p></div>';
-    return '<div class="page">' + title("CONVERSATION LAB", "話術實驗室", "創意負責打開對話，證據負責守住邏輯與法遵。") +
-      '<section class="marketNote"><small>LIVE MARKET CONTEXT · 2026/09/04</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達 8 月資產配置觀點 ↗</a><a href="' + market.fed + '" target="_blank" rel="noopener noreferrer">聯準會 9/3 談話 ↗</a></div></section>' +
-      '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT BRIEF</small><h2>建立客戶情境</h2><label>客戶描述<textarea id="clientText">' + escapeHtml(state.client) + '</textarea></label><label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><button id="generateScript">產生話術 →</button></section>' +
+      '<div class="clientRead"><small>CLIENT SIGNALS</small><b>' + pack.client.summary + '</b><p>系統依輸入文字辨識主要情境；可用左側選單覆寫。</p></div>' +
+      '<blockquote>「' + pack.opening + '」</blockquote>' +
+      '<div class="talkGrid"><section><h3>先問，不先賣</h3><ol><li>' + pack.questions[0] + '</li><li>' + pack.questions[1] + '</li></ol></section>' +
+      '<section><h3>基金在此情境的角色</h3><p>' + pack.role + '</p></section>' +
+      '<section><h3>最新市場證據</h3><p>' + pack.evidence + '</p></section>' +
+      '<section><h3>可核對的基金數字</h3><p class="proofLine">' + pack.metricProof + '</p></section>' +
+      '<section><h3>不靠預測的下一步</h3><p>' + pack.next + '</p></section>' +
+      '<section><h3>顧問式收尾</h3><p>' + pack.close + '</p></section></div>' +
+      '<div class="guardrail"><strong>風險界線</strong><p>' + pack.boundary + '</p></div>' :
+      '<div class="empty"><span>✦</span><h3>等待產生話術</h3><p>基金、客戶文字、主要情境與創意切角會共同改變完整對話。</p></div>';
+    return '<div class="page">' + title("CONVERSATION LAB", "話術實驗室", "同一檔基金，面對不同客戶與情境，不應說同一套話。") +
+      '<section class="marketNote"><small>LIVE MARKET CONTEXT · ' + market.asOf + '</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達 9/7 市場週報 ↗</a><a href="' + market.secondary + '" target="_blank" rel="noopener noreferrer">2026 全球投資人研究 ↗</a></div></section>' +
+      '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT BRIEF</small><h2>建立客戶情境</h2><label>客戶描述<textarea id="clientText" placeholder="例如：55歲企業主，台股與公司資產高度相關，希望增加海外配置，但怕追高。">' + escapeHtml(state.client) + '</textarea></label><label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>主要情境<select id="scenarioSelect">' + scenarioOptions + '</select></label><small class="scenarioHint">選擇「自動判讀」時，會依客戶文字辨識主要問題；也可手動指定。</small><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><button id="generateScript">產生專屬話術 →</button></section>' +
       '<section class="card output ' + (state.generated ? "ready" : "") + '"><div class="cardHead"><div><small>02 / SALES NARRATIVE</small><h2>客製對話框架</h2></div>' + (state.generated ? '<button data-copy="' + escapeHtml(fullScript()) + '">複製全文</button>' : "") + '</div>' + output + '</section></div>' +
-      '<section class="objections"><div class="sectionHead"><div><small>OBJECTION HANDLING</small><h2>快速異議處理</h2></div></div><div>' +
-      objection("市場是不是太高？", "不以單一點位做全進全出；先確認組合集中風險，再用分批與風險預算控制進場。") +
-      objection("為什麼不買 ETF？", "ETF 適合取得市場曝險；" + cleanName(fund.name) + "是否值得加入，要看它能否補足現有持股的風格與集中缺口。") +
-      objection("競品最近報酬更好？", "先把級別、幣別、配息政策與資料日對齊；口徑不同時，不應直接宣稱勝負。") +
+      '<section class="objections"><div class="sectionHead"><div><small>OBJECTION HANDLING</small><h2>' + cleanName(fund.name) + '｜' + pack.scene.label + '</h2></div></div><div>' +
+      pack.objections.map(function (item) { return objection(item.q, item.a); }).join("") +
       '</div></section></div>';
   }
 
@@ -416,6 +699,12 @@
     if (clientText) clientText.addEventListener("input", function () {
       state.client = clientText.value;
       state.generated = false;
+    });
+    var scenarioSelect = document.getElementById("scenarioSelect");
+    if (scenarioSelect) scenarioSelect.addEventListener("change", function () {
+      state.scenario = scenarioSelect.value;
+      state.generated = false;
+      render();
     });
     var generate = document.getElementById("generateScript");
     if (generate) generate.addEventListener("click", function () {
