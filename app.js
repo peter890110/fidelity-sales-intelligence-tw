@@ -364,6 +364,15 @@
     var scene = scenarioDefinitions[client.scenario];
     var metricProof = "公開級別 " + fund.share + "；截至 " + fund.metrics.asOf + "，近一年累積報酬 " + Number(fund.metrics.y1).toFixed(2) + "%、年化標準差 " + Number(fund.metrics.risk).toFixed(2) + "%、夏普值 " + Number(fund.metrics.sharpe).toFixed(2) + "、最高管理年費 " + Number(fund.metrics.expense).toFixed(2) + "%。這些是歷史數字，不是未來承諾。";
     var role = profile.role + "。在「" + scene.label + "」情境下，它不是用來" + scene.avoid + "，而是用來" + scene.use + "。";
+    if (fund.id === "taiwan" && client.holding === "台股") {
+      role = "這個情境下，" + cleanName(fund.name) + "不能直接被定位成分散工具。只有在它取代既有重複台股部位、而非增加台股總曝險，且能證明選股差異時，才值得進一步比較。";
+    } else if (fund.id === "tech" && (client.holding === "科技股" || client.holding === "台股")) {
+      role = "這個情境下，全球科技不能直接被稱為分散。必須先穿透既有持股，確認新增的是全球軟體、服務或不同獲利來源，而不是再次疊加半導體與 AI 風險。";
+    } else if (client.scenario === "income" && fund.metrics.distribution === 0) {
+      role = profile.role + "；但目前選定的 " + fund.share + " 是累積級別，只能以總報酬累積工具討論，不能包裝成現金配息方案。";
+    } else if (client.scenario === "retirement" && fund.risk === "RR5") {
+      role = profile.role + "；對退休情境只能放在長期且可承受完整波動的衛星資金，不應動用三年內生活支出。";
+    }
     var questions = [profile.diagnostic, scene.question];
     var objections = [
       {q:scene.objectionQ,a:scene.objectionA + " 對" + cleanName(fund.name) + "而言，核心檢驗是能否完成「" + profile.identity + "」的組合任務。"},
@@ -525,7 +534,7 @@
     return '<div class="page">' +
       '<section class="hero"><div class="heroCopy"><div class="kicker">FIDELITY / SALES EDGE</div><h1>把市場雜訊，<br><span>變成成交洞察。</span></h1><p>九檔核心基金、同類型競品與當期市場論證，在一次客戶對話需要的距離內。</p><div class="actions"><button data-go="compare">進入競品決策室</button><button class="outline" data-go="script">開啟話術實驗室</button></div></div>' +
       '<article class="signal"><div class="signalTop"><small>TODAY\'S CONVICTION</small><b>01 / 09</b></div><h2>日本價值的重估，<br>不只是匯率交易。</h2><p>從公司治理、股東回報與資本效率切入，讓客戶理解結構性改變，而不是追逐單日指數。</p><div class="stat"><span>近一年累計<small>2026/09/03</small></span><strong>+40.58%</strong></div><button data-fund="japan" title="另開比較頁">拆解競品 ↗</button></article></section>' +
-      '<section class="marketBar"><div><small>MARKET SIGNAL / 09.04</small><h2>' + market.title + '</h2></div><p>' + market.body + '</p><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達觀點 ↗</a></section>' +
+      '<section class="marketBar"><div><small>MARKET SIGNAL / 09.07</small><h2>' + market.title + '</h2></div><p>' + market.body + '</p><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達觀點 ↗</a></section>' +
       '<section class="sectionHead"><div><small>CORE PRIORITIES</small><h2>九檔主推基金</h2></div><button data-go="library">完整資料庫 →</button></section><div class="fundGrid">' + cards + '</div></div>';
   }
 
