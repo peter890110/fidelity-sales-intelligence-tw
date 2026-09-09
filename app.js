@@ -355,7 +355,7 @@
       includesAny(source, ["五年","十年","長期"]) ? "5 年以上" : "待確認";
     var liquidity = includesAny(source, ["每月","生活費","醫療","買房","學費","很快要用","現金流"]) ? "高" :
       includesAny(source, ["長期","十年","不用這筆錢"]) ? "低" : "待確認";
-    var riskTolerance = includesAny(source, ["不能跌","保本","非常保守","低風險","怕虧"]) ? "低" :
+    var riskTolerance = includesAny(source, ["不能跌","不能接受本金","不能承受","本金明顯下跌","保本","非常保守","低風險","怕虧"]) ? "低" :
       includesAny(source, ["積極","高風險","能承受","波動沒關係"]) ? "高" : "中／待確認";
     var experience = includesAny(source, ["第一次","新手","沒買過"]) ? "初次投資" :
       includesAny(source, ["投資多年","有經驗","長期投資"]) ? "有經驗" : "待確認";
@@ -403,19 +403,68 @@
   }
 
   function clientAdjustments(client, fund) {
-    var items = [];
-    if (client.persona === "企業主") items.push("先把企業營運風險與家庭金融資產分開盤點；新增基金不能再複製公司本業或台股景氣風險。");
-    if (client.lifeStage === "退休準備期") items.push("把三年內確定支出切出安全層，再以剩餘長期資金討論成長部位，避免退休前的報酬順序風險。");
-    if (client.lifeStage === "退休提領期") items.push("先建立十二至三十六個月支出緩衝；任何高波動基金只能使用不影響提領計畫的長期資金。");
-    if (client.holdings.indexOf("台股") >= 0) items.push("用底層持股檢查台灣、半導體與 AI 曝險；基金名稱不同不代表風險來源不同。");
-    if (client.holdings.indexOf("科技股") >= 0) items.push("新增部位必須證明獲利驅動不同，否則只是把同一科技循環換一個包裝。");
-    if (client.holdings.indexOf("現金") >= 0) items.push("替等待設定日期與暫停條件，將現金決策由『等感覺』改為可執行規則。");
-    if (client.horizon === "0–2 年") items.push("短期會用到的資金先排除；只用期限足以承受完整週期的部分評估本基金。");
-    if (client.liquidity === "高") items.push("先列出未來十二個月必要現金需求；累積級別不能假設會自動提供現金流。");
-    if (client.riskTolerance === "低") items.push("先用具體金額確認可接受最大損失；若與 " + fund.risk + " 不相容，流程應停在適合度確認。");
-    if (client.goal.indexOf("海外分散") >= 0) items.push("分散要比較地區、產業、幣別與獲利因子，不以基金檔數作為完成標準。");
-    if (!items.length) items.push("先補齊資金用途、持有期限、可接受回撤與既有曝險，再決定基金角色。");
-    return items.slice(0, 4);
+    var stageDecision = client.lifeStage === "累積初期" ?
+      "以長期累積為主，但先確認緊急預備金；短期績效不作為進出依據。" :
+      client.lifeStage === "資產擴張期" ?
+      "同時盤點家庭負債、事業與既有投資，避免新增部位擴大同一景氣風險。" :
+      client.lifeStage === "退休準備期" ?
+      "切出三年內確定支出，再以剩餘長期資金討論成長部位，降低退休前的報酬順序風險。" :
+      client.lifeStage === "退休提領期" ?
+      "先建立十二至三十六個月支出緩衝，高波動基金只能使用不影響提領計畫的長期資金。" :
+      "年齡與人生階段尚未確認；先問資金何時會被使用，再決定可承受的波動週期。";
+    var personaDecision = client.persona === "企業主" ?
+      "把企業營運風險與家庭金融資產分開盤點，避免基金再次複製公司本業或台股景氣風險。" :
+      client.persona === "退休規劃族" ?
+      "以生活支出穩定度為優先，不用單一高報酬敘事取代提領與風險規劃。" :
+      client.persona === "專業人士" ?
+      "用決策條件與風險預算溝通，將產品功能連結到其收入與資產結構。" :
+      client.persona === "受薪投資人" ?
+      "將投入節奏與固定收入、緊急預備金連動，避免一次性市場判斷。" :
+      "客戶身分尚不明確；先確認收入穩定性與主要財富來源。";
+    var holdingDecision = client.holdings.length ?
+      "既有重心為" + client.holding + "；必須穿透檢查國家、產業、幣別與獲利因子，證明新增的是不同風險來源。" :
+      "既有持倉尚未提供；完成底層曝險盤點前，不把任何基金稱為分散。";
+    var goalDecision = client.goal.indexOf("現金流") >= 0 ?
+      "現金流需求先核對實際配息級別、配息來源與總報酬；累積級別不可當成入帳工具。" :
+      client.goal.indexOf("退休穩健") >= 0 ?
+      "以可承受回撤與支出不中斷為成功標準，不以最高報酬為唯一目標。" :
+      client.goal.indexOf("海外分散") >= 0 ?
+      "分散的成功標準是降低原有風險來源的支配力，不是單純增加基金檔數。" :
+      client.goal.indexOf("長期增值") >= 0 ?
+      "把成長來源、持有期限與基本面失效條件寫清楚，再決定核心或衛星角色。" :
+      "目標仍偏抽象；先把『提升效率』拆成收益、波動或成長三者的優先順序。";
+    var horizonDecision = client.horizon === "0–2 年" ?
+      "短期會用到的資金先排除，" + fund.risk + " 產品只使用期限足以承受完整週期的部分。" :
+      client.horizon === "3–5 年" ?
+      "用中期檢視點管理，不因單季波動改變原假設；同時保留到期前的降風險路徑。" :
+      client.horizon === "5 年以上" ?
+      "可用長期基本面與完整週期檢驗，但仍需預先定義最大可接受回撤。" :
+      "期限尚未確認；在知道何時用錢前，不提出部位比例。";
+    var liquidityDecision = client.liquidity === "高" ?
+      "先列出未來十二個月必要現金需求；這部分不得承擔淨值波動，也不能假設累積級別會配息。" :
+      client.liquidity === "低" ?
+      "可把焦點放在長期總報酬，但仍保留緊急資金與定期再平衡機制。" :
+      "流動性需求待確認；先問未來一年是否有買房、醫療、教育或事業支出。";
+    var riskDecision = client.riskTolerance === "低" ?
+      "文字顯示低風險承受度；先停止產品推進並用具體金額確認最大可接受損失，若與 " + fund.risk + " 不相容就不建議。" :
+      client.riskTolerance === "高" ?
+      "即使能承受波動，也需設定單一主題與單一市場上限，不能把承受度當成集中投資許可。" :
+      "風險承受度尚未量化；以『若下跌多少會改變生活或被迫賣出』取得具體界線。";
+    var experienceDecision = client.experience === "初次投資" ?
+      "用原始數字與情境說明，不用術語或績效排名施壓；先採最小可理解、可回顧的決策。" :
+      client.experience === "有經驗" ?
+      "可直接比較費用後報酬、波動、Sharpe、持倉重疊與失效條件，避免只談故事。" :
+      "投資經驗待確認；先確認是否理解匯率、淨值波動與累積／配息級別差異。";
+    return [
+      "生命階段｜" + stageDecision,
+      "客戶身分｜" + personaDecision,
+      "既有持倉｜" + holdingDecision,
+      "投資目標｜" + goalDecision,
+      "資金期限｜" + horizonDecision,
+      "流動性｜" + liquidityDecision,
+      "風險承受度｜" + riskDecision,
+      "投資經驗｜" + experienceDecision
+    ];
   }
 
   function makeOpening(profile, scene, client) {
