@@ -370,20 +370,26 @@
       else scenario = "growth";
     }
     var selectedFund = funds.filter(function (f) { return f.id === fundId; })[0];
-    var alert = "仍需依風險屬性、投資期限、資金用途與法遵規範完成適合度確認。";
+    var alerts = [];
     if (horizon === "0–2 年" && (selectedFund.risk === "RR4" || selectedFund.risk === "RR5")) {
-      alert = "期限警示：0–2 年可能使用的資金，不宜承擔 " + selectedFund.risk + " 股票型基金的完整波動。";
-    } else if (fundId === "taiwan" && holdings.indexOf("台股") >= 0) {
-      alert = "集中度警示：已有台股部位，新增台灣成長基金可能加重單一市場風險，必須先設定台股總上限。";
-    } else if (fundId === "tech" && (holdings.indexOf("科技股") >= 0 || holdings.indexOf("台股") >= 0)) {
-      alert = "重疊警示：全球科技可能與既有台股／科技持倉重疊，應先穿透檢查半導體與 AI 曝險。";
-    } else if (scenario === "income" && selectedFund.metrics.distribution === 0) {
-      alert = "級別警示：選定的是累積級別，沒有現金配發；不可把它當成配息工具銷售。";
-    } else if (scenario === "retirement" && selectedFund.risk === "RR5") {
-      alert = "適合度警示：本基金為 RR5；三年內生活支出不得承擔其完整波動，只能評估長期衛星資金。";
-    } else if (riskTolerance === "低" && (selectedFund.risk === "RR4" || selectedFund.risk === "RR5")) {
-      alert = "風險屬性警示：客戶文字顯示低風險承受度，與 " + selectedFund.risk + " 產品可能不匹配，應先停止銷售並完成適合度確認。";
+      alerts.push("期限警示：0–2 年可能使用的資金，不宜承擔 " + selectedFund.risk + " 股票型基金的完整波動。");
     }
+    if (fundId === "taiwan" && holdings.indexOf("台股") >= 0) {
+      alerts.push("集中度警示：已有台股部位，新增台灣成長基金可能加重單一市場風險，必須先設定台股總上限。");
+    }
+    if (fundId === "tech" && (holdings.indexOf("科技股") >= 0 || holdings.indexOf("台股") >= 0)) {
+      alerts.push("重疊警示：全球科技可能與既有台股／科技持倉重疊，應先穿透檢查半導體與 AI 曝險。");
+    }
+    if (scenario === "income" && selectedFund.metrics.distribution === 0) {
+      alerts.push("級別警示：選定的是累積級別，沒有現金配發；不可把它當成配息工具銷售。");
+    }
+    if (scenario === "retirement" && selectedFund.risk === "RR5") {
+      alerts.push("適合度警示：本基金為 RR5；三年內生活支出不得承擔其完整波動，只能評估長期衛星資金。");
+    }
+    if (riskTolerance === "低" && (selectedFund.risk === "RR4" || selectedFund.risk === "RR5")) {
+      alerts.push("風險屬性警示：客戶文字顯示低風險承受度，與 " + selectedFund.risk + " 產品可能不匹配，應先停止銷售並完成適合度確認。");
+    }
+    var alert = alerts.length ? alerts.join(" ") : "仍需依風險屬性、投資期限、資金用途與法遵規範完成適合度確認。";
     var signals = [
       {label:"生命階段",value:lifeStage},
       {label:"客戶身分",value:persona},
