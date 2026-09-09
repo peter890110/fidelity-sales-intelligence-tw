@@ -51,3 +51,43 @@
 .guardrail strong{color:#9b4c16;font-size:10px;letter-spacing:.08em}
 .guardrail p{margin:7px 0 0!important;color:#704c33!important}
 @media(max-width:680px){.talkGrid{grid-template-columns:1fr}.talkGrid section{min-height:0}.clientRead b{font-size:11px}}
+
+
+/* Deep client-specific narrative blueprints */
+.fieldInsight{display:block;margin:8px 0 16px;padding:11px 13px;border-left:3px solid #8ea3ac;background:#f3f6f6;color:#647981!important;font-size:10px!important;line-height:1.55;letter-spacing:0!important}
+.fieldInsight b{display:block;margin-bottom:3px;color:var(--ink);font-size:11px}
+.fieldInsight em{display:block;margin-top:6px;color:var(--red);font-style:normal;font-weight:800}
+.formPromise{margin:10px 0 0!important;color:#71848c!important;font-size:9px!important;line-height:1.55!important}
+.narrativeBlueprint{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:22px 0 0;padding:16px 18px;background:var(--deep);color:#fff;border-top:4px solid var(--red)}
+.narrativeBlueprint small{display:block;color:#9fb4bd;font-size:8px;letter-spacing:.18em;font-weight:900}
+.narrativeBlueprint b{display:block;margin-top:5px;font:500 22px/1.1 var(--serif)}
+.narrativeBlueprint span{max-width:62%;color:#d6e1e5;font-size:10px;line-height:1.5;text-align:right}
+.clientRead{margin-top:0;border-left:0;border-bottom:1px solid var(--rule);background:#f4f7f7}
+.signalGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:14px -18px -16px;border-top:1px solid var(--rule)}
+.signalItem{min-height:70px;padding:13px 12px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.signalItem:nth-child(4n){border-right:0}
+.signalItem small{color:#7a8c93!important;letter-spacing:.06em!important}
+.signalItem b{margin-top:5px;font-family:var(--sans);font-size:10px;line-height:1.4}
+.personalization{padding:20px 22px;border-left:5px solid var(--red);background:#fff}
+.personalization>small{color:var(--red);font-size:8px;font-weight:900;letter-spacing:.17em}
+.personalization h3{margin:7px 0 10px;font:500 19px/1.3 var(--serif)}
+.personalization ol{margin:0;padding-left:19px}
+.personalization li{margin:6px 0;color:#425760;font-size:11px;line-height:1.6}
+.talkGrid section>small{display:block;color:var(--red);font-size:8px;font-weight:900;letter-spacing:.15em}
+.talkGrid section h3{margin:7px 0 10px;font-size:14px;line-height:1.35}
+.talkGrid section p{font-size:11px;line-height:1.7}
+.talkGrid[data-blueprint="董事會精準"]{grid-template-columns:repeat(3,1fr)}
+.talkGrid[data-blueprint="董事會精準"] section{min-height:190px}
+.talkGrid[data-blueprint="蘇格拉底提問"]{grid-template-columns:1fr}
+.talkGrid[data-blueprint="蘇格拉底提問"] section{display:grid;grid-template-columns:34px minmax(180px,.62fr) 1fr;align-items:start;gap:12px;min-height:0}
+.talkGrid[data-blueprint="蘇格拉底提問"] section h3{margin:0}
+.talkGrid[data-blueprint="蘇格拉底提問"] section p{margin:0}
+.talkGrid[data-blueprint="風險長官"] section:first-child,.talkGrid[data-blueprint="風險長官"] section:nth-child(6){background:#fff7ed;border-left:4px solid var(--amber)}
+.talkGrid[data-blueprint="兩分鐘成交"]{grid-template-columns:1fr}
+.talkGrid[data-blueprint="兩分鐘成交"] section{display:grid;grid-template-columns:34px 210px 1fr;align-items:start;gap:12px;min-height:0}
+.talkGrid[data-blueprint="兩分鐘成交"] section h3{margin:0;color:var(--red)}
+.talkGrid[data-blueprint="兩分鐘成交"] section p{margin:0}
+.talkGrid[data-blueprint="故事比喻"] section:nth-child(2),.talkGrid[data-blueprint="故事比喻"] section:nth-child(5){background:#f5f8f8}
+.objections .sectionHead p{max-width:620px;margin:8px 0 0;color:var(--muted)}
+@media(max-width:1100px){.signalGrid{grid-template-columns:repeat(2,1fr)}.signalItem:nth-child(4n){border-right:1px solid var(--rule)}.signalItem:nth-child(2n){border-right:0}.talkGrid[data-blueprint="董事會精準"]{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.narrativeBlueprint{display:block}.narrativeBlueprint span{display:block;max-width:none;margin-top:10px;text-align:left}.signalGrid{grid-template-columns:1fr 1fr}.talkGrid[data-blueprint="董事會精準"]{grid-template-columns:1fr}.talkGrid[data-blueprint="董事會精準"] section{min-height:0}.talkGrid[data-blueprint="蘇格拉底提問"] section,.talkGrid[data-blueprint="兩分鐘成交"] section{display:block}.talkGrid[data-blueprint="蘇格拉底提問"] section h3,.talkGrid[data-blueprint="兩分鐘成交"] section h3{margin:7px 0 10px}.personalization{padding:18px 16px}}
