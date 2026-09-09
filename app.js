@@ -75,8 +75,21 @@
     secondary:"https://www.fidelity.com.tw/insights-learning/market-insights/be-invested-global-study/"
   };
 
+  var featuredStories = {
+    japan:{headline:"日本價值的重估，不只是匯率交易。",body:"從公司治理、股東回報與資本效率切入，讓客戶理解結構性改變，而不是追逐單日指數。"},
+    bond:{headline:"全球債券的價值，不只是一場降息交易。",body:"用信用研究、存續期間與跨市場配置，討論收益來源與下檔緩衝，而不是只押單一路徑。"},
+    momentum:{headline:"市場換檔時，資產配置也要會換檔。",body:"把股票、債券與其他資產放在同一套風險預算中，讓配置能跟著景氣與市場動能調整。"},
+    income:{headline:"收益的品質，比表面的配息率更重要。",body:"從跨資產收益來源、總報酬與下檔管理切入，避免把單一配息數字誤當成全部答案。"},
+    sustainable:{headline:"高股息之外，更要看企業能否持續配得出來。",body:"用企業品質、股息韌性與永續特徵，補足全球股票組合過度集中在單一成長風格的風險。"},
+    tech:{headline:"AI 的投資機會，不只在一顆晶片。",body:"從半導體、軟體到數位轉型，讓客戶看見全球科技價值鏈的擴散，而不是追逐單一熱門標的。"},
+    asia:{headline:"亞洲成長，正從供應鏈延伸到內需與數位化。",body:"把亞洲不同市場、產業與企業獲利驅動拆開來看，建立美股之外的結構性成長來源。"},
+    taiwan:{headline:"台灣成長，不等於被動追逐指數。",body:"從企業競爭力、產業升級與主動選股切入，說明同樣投資台股，也能有不同的風險來源。"},
+    em:{headline:"新興市場的機會，來自差異而非單一交易。",body:"用在地研究辨識國家、產業與企業差異，讓客戶理解新興市場不是一個同漲同跌的標籤。"}
+  };
+
   var state = {
     page:"home",
+    featuredIndex:0,
     fundId:"japan",
     peerName:"",
     client:"55 歲企業主，台股部位高，希望增加海外資產，但擔心市場估值偏高。",
@@ -85,6 +98,27 @@
     generated:false,
     query:""
   };
+
+  function advanceFeaturedFund() {
+    var storageKey = "fidelityFeaturedFundIndexV1";
+    var previous = -1;
+    try {
+      previous = parseInt(window.localStorage.getItem(storageKey), 10);
+    } catch (error) {
+      previous = -1;
+    }
+    if (!Number.isInteger(previous) || previous < 0 || previous >= funds.length) {
+      previous = Math.floor(Date.now() / 86400000) % funds.length;
+    }
+    state.featuredIndex = (previous + 1) % funds.length;
+    state.fundId = funds[state.featuredIndex].id;
+    state.peerName = "";
+    try {
+      window.localStorage.setItem(storageKey, String(state.featuredIndex));
+    } catch (error) {
+      // Storage may be unavailable in privacy mode; the current visit still works.
+    }
+  }
 
   function comparisonUrl(fundId, peerName) {
     var url = new URL(window.location.href);
@@ -724,12 +758,14 @@
   }
 
   function renderHome() {
+    var featured = funds[state.featuredIndex] || funds[0];
+    var story = featuredStories[featured.id] || {headline:cleanName(featured.name),body:featured.thesis};
     var cards = funds.map(function (f, i) {
-      return '<button data-fund="' + f.id + '" class="' + (i === 0 ? "featured" : "") + '" title="另開比較頁"><div><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + f.risk + '</span></div><small>' + f.asset + ' / ' + f.theme + '</small><h3>' + cleanName(f.name) + '</h3><p>' + f.share + '</p><div class="return"><small>1Y · ' + f.perfDate + '</small><b>' + pct(f.y1) + '</b></div></button>';
+      return '<button data-fund="' + f.id + '" class="' + (f.id === featured.id ? "featured" : "") + '" title="另開比較頁"><div><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + f.risk + '</span></div><small>' + f.asset + ' / ' + f.theme + '</small><h3>' + cleanName(f.name) + '</h3><p>' + f.share + '</p><div class="return"><small>1Y · ' + f.perfDate + '</small><b>' + pct(f.y1) + '</b></div></button>';
     }).join("");
     return '<div class="page">' +
       '<section class="hero"><div class="heroCopy"><div class="kicker">FIDELITY / SALES EDGE</div><h1>把市場雜訊，<br><span>變成成交洞察。</span></h1><p>九檔核心基金、同類型競品與當期市場論證，在一次客戶對話需要的距離內。</p><div class="actions"><button data-go="compare">進入競品決策室</button><button class="outline" data-go="script">開啟話術實驗室</button></div></div>' +
-      '<article class="signal"><div class="signalTop"><small>TODAY\'S CONVICTION</small><b>01 / 09</b></div><h2>日本價值的重估，<br>不只是匯率交易。</h2><p>從公司治理、股東回報與資本效率切入，讓客戶理解結構性改變，而不是追逐單日指數。</p><div class="stat"><span>近一年累計<small>2026/09/03</small></span><strong>+40.58%</strong></div><button data-fund="japan" title="另開比較頁">拆解競品 ↗</button></article></section>' +
+      '<article class="signal"><div class="signalTop"><small>WATCHLIST / 看板基金</small><b>' + String(state.featuredIndex + 1).padStart(2, "0") + ' / ' + String(funds.length).padStart(2, "0") + '</b></div><h2>' + escapeHtml(story.headline) + '</h2><p class="signalFundName">' + escapeHtml(cleanName(featured.name)) + '｜' + escapeHtml(featured.share) + '</p><p>' + escapeHtml(story.body) + '</p><div class="stat"><span>近一年累計<small>' + escapeHtml(featured.perfDate) + '</small></span><strong>' + pct(featured.y1) + '</strong></div><button data-fund="' + featured.id + '" title="另開比較頁">拆解競品 ↗</button></article></section>' +
       '<section class="marketBar"><div><small>MARKET SIGNAL / 09.07</small><h2>' + market.title + '</h2></div><p>' + market.body + '</p><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達觀點 ↗</a></section>' +
       '<section class="sectionHead"><div><small>CORE PRIORITIES</small><h2>九檔主推基金</h2></div><button data-go="library">完整資料庫 →</button></section><div class="fundGrid">' + cards + '</div></div>';
   }
@@ -857,7 +893,9 @@
   function bind() {
     Array.prototype.forEach.call(document.querySelectorAll("[data-page]"), function (button) {
       button.addEventListener("click", function () {
-        state.page = button.getAttribute("data-page");
+        var destination = button.getAttribute("data-page");
+        if (destination === "home" && state.page !== "home") advanceFeaturedFund();
+        state.page = destination;
         render();
       });
     });
@@ -957,6 +995,7 @@
   }
 
   restoreStateFromUrl();
+  if (state.page === "home") advanceFeaturedFund();
   render();
   if (state.page === "compare" && window.location.hash) {
     window.requestAnimationFrame(function () {
