@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var auditDate = "2026/09/09";
+  var auditDate = "2026/09/10";
   var fidelitySource = "https://www.fidelity.com.tw/fund-and-service/fundui/funds/?grouping=%24fundRangeCode&intcmp=menu_ws_fund-and-service_sep_2022";
   var funds = [
     {id:"japan",name:"富達基金－日本價值基金",en:"Fidelity Japan Value Fund",share:"A2股日圓",asset:"股票型",theme:"日本價值",risk:"RR4",nav:"11,531.2000 日圓",navDate:"2026/09/03",y1:40.58,y3:91.92,perfDate:"2026/09/03",thesis:"公司治理改革、資本效率提升與價值重估構成長期選股脈絡。",role:"降低純科技成長曝險，補進日本企業改革紅利",source:"https://www.moneydj.com/funddj/yp/yp012001.djhtm?a=FTZA66",metrics:{asOf:"2026/09/03",y1:40.58,risk:18.48,distribution:0.02,distributionDate:"2026/07/31",expense:1.50,sharpe:0.55,distributionNote:"最新年化配息率（年配）",perfSource:"https://www.moneydj.com/funddj/yp/yp012001.djhtm?a=FTZA66",basicSource:"https://www.moneydj.com/funddj/yp/yp011001.djhtm?a=FTZA66",distributionSource:"https://www.moneydj.com/funddj/yp/wb05.djhtm?a=FTZA66"}},
@@ -67,6 +67,107 @@
     ]
   };
 
+  // MoneyDJ 逐級別查核（2026/09/10 執行；績效與淨值多為 09/09，風險多為 09/08）。
+  // 競品池只保留與主基金同幣別、同累積／配息型態且策略範圍可比較的公開級別。
+  function auditedMetrics(id, domestic, perfDate, riskDate, y1, y3, riskValue, distribution, distributionDate, expense, sharpe, distributionNote) {
+    var perfPage = domestic ? "yp012000" : "yp012001";
+    var basicPage = domestic ? "yp011000" : "yp011001";
+    var base = "https://www.moneydj.com/funddj/yp/";
+    return {
+      asOf:perfDate,
+      riskDate:riskDate,
+      y1:y1,
+      y3:y3,
+      risk:riskValue,
+      distribution:distribution,
+      distributionDate:distributionDate,
+      expense:expense,
+      sharpe:sharpe,
+      distributionNote:distributionNote,
+      perfSource:base + perfPage + ".djhtm?a=" + id,
+      riskSource:base + "wb07.djhtm?a=" + id,
+      basicSource:base + basicPage + ".djhtm?a=" + id,
+      navSource:"https://www.moneydj.com/funddj/ya/yp01000" + (domestic ? "0" : "1") + ".djhtm?a=" + id,
+      distributionSource:base + "wb05.djhtm?a=" + id
+    };
+  }
+
+  var currentFundAudit = {
+    japan:{share:"A2股日圓",nav:"11,290.3000 日圓",navDate:"2026/09/09",y1:34.85,y3:86.32,perfDate:"2026/09/09",classBasis:"日圓｜原幣｜未標示避險",metrics:auditedMetrics("FTZA66",false,"2026/09/09","2026/09/08",34.85,86.32,11.82,0.02,"2026/08/03",1.50,0.71,"最近一次年化配息率 0.02%（除息日 2026/08/03）")},
+    bond:{share:"A股累計美元",nav:"14.8700 美元",navDate:"2026/09/09",y1:2.55,y3:22.29,perfDate:"2026/09/09",classBasis:"美元｜累積｜未標示避險",metrics:auditedMetrics("FTZW6",false,"2026/09/09","2026/09/08",2.55,22.29,1.55,0,null,0.90,0.27,"A 累積美元；MoneyDJ 查無配息紀錄")},
+    momentum:{share:"A股累計美元",nav:"22.9000 美元",navDate:"2026/09/09",y1:22.99,y3:58.26,perfDate:"2026/09/09",classBasis:"美元｜累積｜未標示避險",metrics:auditedMetrics("FTH13",false,"2026/09/09","2026/09/08",22.99,58.26,10.44,0,null,1.25,0.57,"A 累積美元；MoneyDJ 查無配息紀錄")},
+    income:{share:"A股累計美元",nav:"15.8800 美元",navDate:"2026/09/09",y1:10.28,y3:28.90,perfDate:"2026/09/09",classBasis:"美元｜累積｜未標示避險",metrics:auditedMetrics("FTZU6",false,"2026/09/09","2026/09/08",10.28,28.90,6.08,0,null,1.25,0.45,"A 累積美元；MoneyDJ 查無配息紀錄")},
+    sustainable:{share:"A股累計美元",nav:"15.1600 美元",navDate:"2026/09/09",y1:11.72,y3:56.14,perfDate:"2026/09/09",classBasis:"美元｜累積｜未標示避險",metrics:auditedMetrics("FTZX7",false,"2026/09/09","2026/09/08",11.72,56.14,7.35,0,null,1.50,0.45,"A 累積美元；MoneyDJ 查無配息紀錄")},
+    tech:{share:"A股歐元",nav:"92.9500 歐元",navDate:"2026/09/09",y1:23.54,y3:73.51,perfDate:"2026/09/09",classBasis:"歐元｜A 級別｜未標示避險",metrics:auditedMetrics("FTZ62",false,"2026/09/09","2026/09/08",23.54,73.51,17.15,0,null,1.50,0.39,"A 歐元；MoneyDJ 查無配息紀錄")},
+    asia:{share:"A股累計美元",nav:"52.6600 美元",navDate:"2026/09/09",y1:56.73,y3:108.39,perfDate:"2026/09/09",classBasis:"美元｜累積｜未標示避險",metrics:auditedMetrics("FTZF8",false,"2026/09/09","2026/09/08",56.73,108.39,21.58,0,null,1.50,0.65,"A 累積美元；MoneyDJ 查無配息紀錄")},
+    taiwan:{share:"A類型累積型（新臺幣）",nav:"238.2600 新臺幣",navDate:"2026/09/09",y1:140.04,y3:290.53,perfDate:"2026/09/09",classBasis:"新臺幣｜累積／不配息｜境內基金",metrics:auditedMetrics("ACFD02",true,"2026/09/09","2026/09/09",140.04,290.53,38.48,0,null,1.60,0.72,"A 類型累積；MoneyDJ 查無配息紀錄")},
+    em:{share:"A股美元",nav:"51.8900 美元",navDate:"2026/09/09",y1:46.29,y3:98.38,perfDate:"2026/09/09",classBasis:"美元｜A 級別｜未標示避險",metrics:auditedMetrics("FTZ02",false,"2026/09/09","2026/09/08",46.29,98.38,18.59,0.06,"2026/08/03",1.50,0.64,"最近一次年化配息率 0.06%（除息日 2026/08/03）")}
+  };
+
+  funds = funds.map(function (fund) {
+    var verified = currentFundAudit[fund.id];
+    if (!verified) return fund;
+    Object.keys(verified).forEach(function (key) { fund[key] = verified[key]; });
+    fund.source = fund.metrics.perfSource;
+    return fund;
+  });
+
+  function verifiedPeer(name, id, domestic, type, classBasis, note, perfDate, riskDate, y1, y3, riskValue, distribution, distributionDate, expense, sharpe, distributionNote, extra) {
+    var metrics = auditedMetrics(id, domestic, perfDate, riskDate, y1, y3, riskValue, distribution, distributionDate, expense, sharpe, distributionNote);
+    if (extra) Object.keys(extra).forEach(function (key) { metrics[key] = extra[key]; });
+    return {name:name,id:id,type:type,classBasis:classBasis,note:note,source:metrics.perfSource,metrics:metrics};
+  }
+
+  peers = {
+    japan:[
+      verifiedPeer("富蘭克林坦伯頓日本基金日圓 A（ACC）","FLZA3",false,"同級別競品","日圓｜累積｜未標示避險","同為日本股票與日圓零配息級別；策略較偏大型均衡。","2026/09/09","2026/09/08",19.97,89.03,14.40,0,null,1.00,0.36,"累積級別；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("野村日本策略價值基金 T 日圓類股","NFI09",false,"同級別競品","日圓｜T 級別｜未標示避險","已改用日圓類股，不再以美元避險級別與富達原幣績效混比。","2026/09/09","2026/09/08",20.85,74.89,12.06,0,null,2.00,0.41,"日圓類股；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("瀚亞投資－日本動力股票基金 Aj（日圓）","IOFA5",false,"同級別競品","日圓｜Aj 級別｜未標示避險","同為日本股票、日圓級別；風格較偏動能與集中選股。","2026/09/09","2026/09/08",45.23,85.37,16.57,0,null,1.50,0.64,"Aj 日圓；MoneyDJ 查無配息紀錄")
+    ],
+    bond:[
+      verifiedPeer("路博邁全球策略收益債券基金 T 累積型（美元）","ACNB114",true,"同級別競品","美元｜累積｜未標示避險","已改用 T 累積美元級別，不再以台幣級別比較。","2026/09/08","2026/09/08",0.28,15.94,1.38,0,null,1.50,-0.20,"T 累積美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("聯博－美國收益基金 A2 級別美元","ALZ10",false,"同級別競品","美元｜A2 級別｜未標示避險","美元、零配息公開級別；策略較偏美國收益債，需同時看信用配置。","2026/09/09","2026/09/08",-0.30,16.08,1.53,0,null,1.10,-0.27,"A2 美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("PIMCO 多元收益債券基金 E 級累積股份","PIK11",false,"同級別競品","美元｜累積｜未標示避險","美元累積級別；多元信用收益取向，非投資等級曝險可能較高。","2026/09/09","2026/09/08",3.30,23.50,1.76,0,null,1.59,0.37,"E 級累積；MoneyDJ 查無配息紀錄")
+    ],
+    momentum:[
+      verifiedPeer("群益潛力收益多重資產基金 NA 累積型（美元）","ACCA210",true,"同級別競品","美元｜累積｜未標示避險","同為美元累積多重資產；策略偏收益，與動能型的風險預算不同。","2026/09/08","2026/09/08",4.69,35.54,10.83,0,null,1.70,0.10,"NA 累積美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("PIMCO 收益增長基金 M 級累積股份","PIMB8",false,"同級別競品","美元｜累積｜未標示避險","同為美元累積多重資產；目前三年資料尚未形成。","2026/09/09","2026/09/08",19.41,null,5.60,0,null,1.60,0.90,"M 級累積；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("安聯收益成長基金 AT 累積類股（美元）","TLZ63",false,"同級別競品","美元｜累積｜未標示避險","美元累積平衡型；區域較偏美國，需揭露投資範圍差異。","2026/09/09","2026/09/08",9.32,36.72,6.27,0,null,1.50,0.37,"AT 累積美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("聯博－全球多元收益基金 A 級別美元","ALBG2",false,"同級別競品","美元｜A 級別｜未標示避險","全球多重資產美元級別，可比較配置框架與風險目標。","2026/09/09","2026/09/08",8.14,39.44,3.74,0,null,1.50,0.57,"A 美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("富達基金－全球多元收益基金 A 股累計美元","FTZA92",false,"同級別競品","美元｜累積｜未標示避險","同品牌美元累積新策略；2026/01/14 成立，未滿一年不補值。","2026/09/09","2026/09/08",null,null,null,0,null,1.25,null,"A 累積美元；MoneyDJ 查無配息紀錄",{availabilityNote:"成立未滿一年",shortTermLabel:"六個月",shortTermValue:8.11}),
+      verifiedPeer("施羅德環球基金系列－環球多元收益（美元）A－累積","PYZW6",false,"同級別競品","美元｜累積｜未標示避險","全球平衡型美元累積級別。","2026/09/09","2026/09/08",11.40,40.68,3.69,0,null,1.25,0.80,"A 累積美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("貝萊德環球資產配置基金 A2 美元","SHZB2",false,"同級別競品","美元｜A2 級別｜未標示避險","全球動態配置美元零配息級別，可比較風險預算與資產調整。","2026/09/09","2026/09/08",12.12,46.21,6.29,0,null,1.50,0.51,"A2 美元；MoneyDJ 查無配息紀錄")
+    ],
+    income:[
+      verifiedPeer("貝萊德多元收益成長基金 A2 美元","SHZA19",false,"同級別競品","美元｜A2 級別｜未標示避險","同屬多重資產收益類別的美元零配息級別。","2026/09/09","2026/09/08",10.42,39.23,4.77,0,null,1.50,0.58,"A2 美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("安聯收益成長基金 AT 累積類股（美元）","TLZ63",false,"同級別競品","美元｜累積｜未標示避險","美元累積平衡型；區域較偏美國，適合比較收益來源與波動。","2026/09/09","2026/09/08",9.32,36.72,6.27,0,null,1.50,0.37,"AT 累積美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("聯博－全球多元收益基金 A 級別美元","ALBG2",false,"同級別競品","美元｜A 級別｜未標示避險","全球多重資產美元級別，可比較收益來源與風險效率。","2026/09/09","2026/09/08",8.14,39.44,3.74,0,null,1.50,0.57,"A 美元；MoneyDJ 查無配息紀錄")
+    ],
+    sustainable:[
+      verifiedPeer("貝萊德全球智慧數據股票入息基金 A2 美元","SHZU0",false,"同級別競品","美元｜A2 級別｜未標示避險","改用全球股票型的 A2 美元級別，不再使用 B2 新級別或多重資產策略。","2026/09/09","2026/09/08",16.02,58.47,6.97,0,null,1.50,0.59,"A2 美元；MoneyDJ 查無配息紀錄")
+    ],
+    tech:[
+      verifiedPeer("貝萊德世界科技基金 A2 歐元","SHZ72",false,"同級別競品","歐元｜A2 級別｜未標示避險","同為全球科技股票與歐元級別。","2026/09/09","2026/09/08",39.39,113.25,25.29,0,null,1.50,0.39,"A2 歐元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("聯博－國際科技基金 A 級別歐元","ALZ30",false,"同級別競品","歐元｜A 級別｜未標示避險","同為全球資訊科技股票與歐元級別。","2026/09/09","2026/09/08",47.00,131.43,25.10,0,null,2.00,0.48,"A 歐元；MoneyDJ 查無配息紀錄")
+    ],
+    asia:[
+      verifiedPeer("瀚亞投資－亞洲股票基金 A（美元）","IOF26",false,"同級別競品","美元｜A 級別｜未標示避險","亞洲股票美元零配息級別，可比較國家配置與選股來源。","2026/09/09","2026/09/08",39.52,86.34,14.25,0,null,1.50,0.69,"A 美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("施羅德環球基金系列－新興亞洲（美元）A－累積","PYZ84",false,"同級別競品","美元｜累積｜未標示避險","美元累積級別；新興亞洲範圍與富達全亞洲仍有範圍差異。","2026/09/09","2026/09/08",38.10,87.70,18.41,0,null,1.50,0.55,"A 累積美元；MoneyDJ 查無配息紀錄")
+    ],
+    taiwan:[
+      verifiedPeer("安聯台灣科技基金","ACDD04",true,"同級別競品","新臺幣｜不配息｜境內基金","台灣科技股票；同幣別但產業集中度較高。","2026/09/09","2026/09/09",178.18,391.96,37.94,0,null,1.60,0.85,"MoneyDJ 查無配息紀錄"),
+      verifiedPeer("安聯台灣大壩基金 A 累積型（台幣）","ACDD01",true,"同級別競品","新臺幣｜累積｜境內基金","台灣一般股票型，可比較主動選股與產業配置。","2026/09/09","2026/09/09",158.78,338.52,37.75,0,null,1.60,0.79,"A 累積台幣；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("路博邁 5G 股票基金 T 累積型（台幣）","ACNB47",true,"同級別競品","新臺幣｜累積｜境內基金","5G 主題同幣別累積級別；科技集中度較高。","2026/09/08","2026/09/08",67.75,219.69,35.47,0,null,2.00,0.46,"T 累積台幣；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("野村台灣運籌基金","ACKH03",true,"同級別競品","新臺幣｜不配息｜境內基金","台灣一般股票型，可比較產業輪動。","2026/09/09","2026/09/09",176.62,369.45,37.80,0,null,1.50,0.85,"MoneyDJ 查無配息紀錄"),
+      verifiedPeer("元大多多基金 A 不配息（台幣）","ACYT03",true,"同級別競品","新臺幣｜不配息｜境內基金","台灣一般股票型，同幣別不配息級別。","2026/09/09","2026/09/09",197.34,350.95,34.47,0,null,1.75,0.99,"A 不配息台幣"),
+      verifiedPeer("統一奔騰基金","ACPS10",true,"同級別競品","新臺幣｜不配息｜境內基金","台灣科技類股票；同幣別但產業集中度較高。","2026/09/09","2026/09/09",131.62,288.17,35.23,0,null,1.60,0.74,"MoneyDJ 查無配息紀錄")
+    ],
+    em:[
+      verifiedPeer("摩根基金－環球新興市場機會基金 A 股（美元）（累計）","JFZD1",false,"同級別競品","美元｜累計｜未標示避險","全球新興市場股票美元累計級別。","2026/09/09","2026/09/08",45.40,89.90,15.36,0,null,1.50,0.72,"A 累計美元；MoneyDJ 查無配息紀錄"),
+      verifiedPeer("施羅德環球基金系列－新興市場（美元）A－累積","PYZ69",false,"同級別競品","美元｜累積｜未標示避險","全球新興市場股票美元累積級別。","2026/09/09","2026/09/08",44.17,103.11,15.26,0,null,1.50,0.73,"A 累積美元；MoneyDJ 查無配息紀錄")
+    ]
+  };
+
   var market = {
     asOf:"2026/09/07",
     title:"就業轉強、成長動能略降；股票仍偏正向，但風險預算更重要",
@@ -92,7 +193,20 @@
     featuredIndex:0,
     fundId:"japan",
     peerName:"",
-    client:"55 歲企業主，台股部位高，希望增加海外資產，但擔心市場估值偏高。",
+    client:"",
+    clientProfile:{
+      age:"",
+      persona:"",
+      assets:"",
+      holdings:"",
+      goal:"",
+      horizon:"",
+      liquidity:"",
+      risk:"",
+      experience:"",
+      concern:"",
+      notes:""
+    },
     scenario:"auto",
     mode:"反直覺破題",
     generated:false,
@@ -427,6 +541,7 @@
     var signals = [
       {label:"生命階段",value:lifeStage},
       {label:"客戶身分",value:persona},
+      {label:"可投資資產",value:amount},
       {label:"既有重心",value:holding},
       {label:"核心目標",value:goal},
       {label:"可用期限",value:horizon},
@@ -438,7 +553,7 @@
       source:source, age:age, amount:amount, lifeStage:lifeStage, persona:persona, holdings:holdings, holding:holding,
       goal:goal, scenario:scenario, horizon:horizon, liquidity:liquidity, riskTolerance:riskTolerance,
       experience:experience, alert:alert, signals:signals,
-      summary:(age ? age + "歲 · " : "") + persona + "｜" + lifeStage + "｜既有 " + holding + "｜目標 " + goal + "｜" + scenarioDefinitions[scenario].label
+      summary:(age ? age + "歲 · " : "") + persona + "｜" + lifeStage + "｜資產 " + amount + "｜既有 " + holding + "｜目標 " + goal + "｜" + scenarioDefinitions[scenario].label
     };
   }
 
@@ -495,9 +610,13 @@
       client.experience === "有經驗" ?
       "可直接比較費用後報酬、波動、Sharpe、持倉重疊與失效條件，避免只談故事。" :
       "投資經驗待確認；先確認是否理解匯率、淨值波動與累積／配息級別差異。";
+    var amountDecision = client.amount === "未提供" ?
+      "可投資資產尚未提供；無法計算單一基金上限，先確認不影響生活與事業現金流的可承擔金額。" :
+      "已知可投資資產約 " + client.amount + "；部位建議仍須扣除短期用途與緊急預備金，再以可承受損失反推上限。";
     return [
       "生命階段｜" + stageDecision,
       "客戶身分｜" + personaDecision,
+      "資產規模｜" + amountDecision,
       "既有持倉｜" + holdingDecision,
       "投資目標｜" + goalDecision,
       "資金期限｜" + horizonDecision,
@@ -639,7 +758,8 @@
   }
 
   function pct(value) {
-    return "+" + Number(value).toFixed(2) + "%";
+    if (typeof value !== "number" || !isFinite(value)) return "—";
+    return (value > 0 ? "+" : "") + Number(value).toFixed(2) + "%";
   }
 
   var metricDefinitions = [
@@ -737,7 +857,7 @@
       '<g class="radarGrid"><polygon points="' + radarPoints([1,1,1,1,1],116) + '"></polygon><polygon points="' + radarPoints([.67,.67,.67,.67,.67],116) + '"></polygon><polygon points="' + radarPoints([.34,.34,.34,.34,.34],116) + '"></polygon>' + axisLines + '</g>' +
       '<polygon class="fidelityShape" points="' + radarPoints(fidelityValues,116) + '"></polygon><polygon class="peerShape" points="' + radarPoints(peerValues,116) + '"></polygon>' + dots(fidelityValues,"fidelityDot") + dots(peerValues,"peerDot") + '</svg>' + labels + '</div>' +
       '<p class="radarReading"><b>讀圖：</b>配息軸採 0%–10% 絕對刻度，因此 0% 位於正中心，0.02% 只比中心多出極小距離；其餘四項採同類基金池 Z-score 標準化，50 代表同類平均，並收斂在 30–70。五個指標都是數值越高越外；風險與費用通常越低較佳，配息率較高也不等於總報酬較佳。這是比較指數，不是基金評分。</p>' +
-      '<div class="metricMatrix"><div class="metricRow metricHead"><div>原始指標</div><strong>' + cleanName(fund.name) + '</strong><strong>' + peer.name + '</strong></div>' + rows + '<p>績效／風險／Sharpe 資料日：' + fund.metrics.asOf + '、' + peer.metrics.asOf + '。配息資料日依各級別最近紀錄；費用率採 MoneyDJ 揭露的最高經理費。</p></div>';
+      '<div class="metricMatrix"><div class="metricRow metricHead"><div>原始指標</div><strong>' + cleanName(fund.name) + '</strong><strong>' + peer.name + '</strong></div>' + rows + '<p>績效資料日：' + fund.metrics.asOf + '、' + peer.metrics.asOf + '；風險／Sharpe 資料日：' + fund.metrics.riskDate + '、' + peer.metrics.riskDate + '。配息採各級別最近紀錄；費用率採 MoneyDJ 揭露的最高管理年費。</p></div>';
   }
 
   function escapeHtml(value) {
@@ -770,30 +890,39 @@
       '<section class="sectionHead"><div><small>CORE PRIORITIES</small><h2>九檔主推基金</h2></div><button data-go="library">完整資料庫 →</button></section><div class="fundGrid">' + cards + '</div></div>';
   }
 
+  function sourceAuditGroup(label, name, metrics) {
+    return '<div class="sourceGroup"><small>' + escapeHtml(label) + '</small><h3>' + escapeHtml(cleanName(name)) + '</h3><div>' +
+      '<a href="' + metrics.perfSource + '" target="_blank" rel="noopener noreferrer">績效頁 ↗</a>' +
+      '<a href="' + metrics.riskSource + '" target="_blank" rel="noopener noreferrer">風險／夏普頁 ↗</a>' +
+      '<a href="' + metrics.basicSource + '" target="_blank" rel="noopener noreferrer">級別／費用頁 ↗</a>' +
+      '<a href="' + metrics.navSource + '" target="_blank" rel="noopener noreferrer">最新淨值頁 ↗</a>' +
+      '<a href="' + metrics.distributionSource + '" target="_blank" rel="noopener noreferrer">配息頁 ↗</a></div></div>';
+  }
+
   function renderCompare() {
     var fund = currentFund();
     var list = currentPeers();
     var peer = currentPeer();
     var fundOptions = options(funds, fund.id, "id", function (f) { return f.name + "｜" + f.share; });
-    var peerOptions = options(list, peer.name, "name", function (p) { return p.name; });
+    var peerOptions = options(list, peer.name, "name", function (p) { return p.name + "｜" + p.classBasis; });
     var peerCards = list.map(function (p, i) {
       var m = p.metrics;
       var summary = hasCompleteMetrics(p) ? '<div class="peerMiniMetrics"><b>1Y ' + metricDefinitions[0].format(m.y1) + '</b><span>風險 ' + metricDefinitions[1].format(m.risk) + '</span><span>費用 ' + metricDefinitions[3].format(m.expense) + '</span><small>資料日 ' + m.asOf + '</small></div>' : (m ? '<div class="peerMiniMetrics"><b>1Y 成立未滿一年</b><span>' + m.shortTermLabel + ' ' + pct(m.shortTermValue) + '</span><span>費用 ' + metricDefinitions[3].format(m.expense) + '</span><small>資料日 ' + m.asOf + '</small></div>' : '');
-      return '<button data-peer="' + escapeHtml(p.name) + '" class="' + (p.name === peer.name ? "active" : "") + '" title="另開比較頁"><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + p.type + '</span><h3>' + p.name + '</h3><p>' + p.note + '</p>' + summary + '<small>查看比較 ↗</small></button>';
+      return '<button data-peer="' + escapeHtml(p.name) + '" class="' + (p.name === peer.name ? "active" : "") + '" title="另開比較頁"><em>' + String(i + 1).padStart(2, "0") + '</em><span>' + p.type + '</span><h3>' + p.name + '</h3><p class="classBasis">' + p.classBasis + '</p><p>' + p.note + '</p>' + summary + '<small>查看比較 ↗</small></button>';
     }).join("");
     var peerRows = list.map(function (p, i) {
-      return '<tr class="' + (p.name === peer.name ? "selected" : "") + '"><td>' + String(i + 1).padStart(2, "0") + '</td><td><b>' + p.name + '</b><small>' + p.note + '</small></td><td>' + p.type + '</td><td>' + peerMetricCell(p, metricDefinitions[0], '資料日 ' + (p.metrics ? p.metrics.asOf : '未提供')) + '</td><td>' + peerMetricCell(p, metricDefinitions[1], '年化標準差 · ' + (p.metrics ? p.metrics.asOf : '未提供')) + '</td><td>' + peerMetricCell(p, metricDefinitions[3], '最高管理年費') + '</td><td><button data-peer="' + escapeHtml(p.name) + '" title="另開比較頁">比較 ↗</button><a href="' + p.source + '" target="_blank" rel="noopener noreferrer">來源 ↗</a></td></tr>';
+      return '<tr class="' + (p.name === peer.name ? "selected" : "") + '"><td>' + String(i + 1).padStart(2, "0") + '</td><td><b>' + p.name + '</b><small>' + p.note + '</small></td><td><b class="basisCell">' + p.classBasis + '</b><small>' + p.type + '</small></td><td>' + peerMetricCell(p, metricDefinitions[0], '績效日 ' + (p.metrics ? p.metrics.asOf : '未提供')) + '</td><td>' + peerMetricCell(p, metricDefinitions[1], '年化標準差 · ' + (p.metrics ? p.metrics.riskDate : '未提供')) + '</td><td>' + peerMetricCell(p, metricDefinitions[3], '最高管理年費') + '</td><td><button data-peer="' + escapeHtml(p.name) + '" title="另開比較頁">比較 ↗</button><a href="' + p.metrics.basicSource + '" target="_blank" rel="noopener noreferrer">核對級別 ↗</a></td></tr>';
     }).join("");
     var opening = "很多客戶先問哪一檔報酬高，但真正專業的比較要先確認級別、幣別、資料日與投資範圍。" + fund.name + "的配置角色是：" + fund.role + "。";
     var peerMetricEvidence = hasCompleteMetrics(peer) ? '1Y ' + metricDefinitions[0].format(peer.metrics.y1) + ' / 年化標準差 ' + metricDefinitions[1].format(peer.metrics.risk) + ' / Sharpe ' + metricDefinitions[4].format(peer.metrics.sharpe) + '<small>' + peer.metrics.asOf + '</small>' : (peer.metrics ? '<span class="pending">' + peer.metrics.availabilityNote + '：一年績效、風險與 Sharpe 尚未形成；' + peer.metrics.shortTermLabel + ' ' + pct(peer.metrics.shortTermValue) + '</span><small>' + peer.metrics.asOf + '</small>' : '<span class="pending">五指標尚未完成同源核對</span>');
     return '<div class="page">' + title("COMPETITOR INTELLIGENCE", "競品決策室", "先確認可比性，再談績效；沒有同日口徑，就不下勝負結論。") +
       '<div class="compareAnchors"><a href="#comparison">比較總覽</a><a href="#metrics">五項指標</a><a href="#sources">資料口徑</a><a href="#universe">同類基金</a></div>' +
       '<div class="selectors"><label>富達核心基金<select id="fundSelect">' + fundOptions + '</select></label><b>VS</b><label>競品基金<select id="peerSelect">' + peerOptions + '</select></label></div>' +
-      '<section id="comparison" class="compareLead"><div><small>' + peer.type + '</small><h2>' + cleanName(fund.name) + '<br><span>對比 ' + peer.name + '</span></h2><p>' + peer.note + '</p><button data-copy="' + escapeHtml(opening) + '">複製顧問式開場</button></div><div class="verified"><small>FIDELITY VERIFIED</small><b>' + pct(fund.y1) + '</b><span>近一年累計 · ' + fund.perfDate + '</span><b>' + fund.nav + '</b><span>最新淨值 · ' + fund.navDate + '</span></div></section>' +
+      '<section id="comparison" class="compareLead"><div><small>' + peer.type + '</small><h2>' + cleanName(fund.name) + '<br><span>對比 ' + peer.name + '</span></h2><div class="classMatch"><div><small>富達級別</small><b>' + fund.classBasis + '</b></div><i>＝</i><div><small>競品級別</small><b>' + peer.classBasis + '</b></div></div><p>' + peer.note + '</p><button data-copy="' + escapeHtml(opening) + '">複製顧問式開場</button></div><div class="verified"><small>FIDELITY VERIFIED</small><b>' + pct(fund.y1) + '</b><span>近一年累計 · ' + fund.perfDate + '</span><b>' + fund.nav + '</b><span>最新淨值 · ' + fund.navDate + '</span></div></section>' +
       '<div class="keyData"><div><small>基金級別</small><b>' + fund.share + '</b><span>' + fund.asset + '</span></div><div><small>近一年累計</small><b>' + pct(fund.y1) + '</b><span>' + fund.perfDate + '</span></div><div><small>近三年累計</small><b>' + pct(fund.y3) + '</b><span>' + fund.perfDate + '</span></div><div><small>風險等級</small><b>' + fund.risk + '</b><span>數字越高風險越高</span></div><div><small>最新淨值</small><b>' + fund.nav + '</b><span>' + fund.navDate + '</span></div></div>' +
       '<div id="metrics" class="compareGrid"><section class="card radarCard"><div class="cardHead"><div><small>FIVE-METRIC RADAR</small><h2>五指標同類比較</h2></div><span>原始數字｜非主觀評分</span></div>' + radarChart(fund, peer) + '<p class="method">雷達圖只做同類池相對位置視覺化，不是星等，也不代表投資建議。風險採年化標準差；費用率採最高經理費；累積級別無配息紀錄時列 0.00%。</p></section>' +
-      '<section id="sources" class="card evidence"><small>SOURCE AUDIT</small><h2>證據與口徑</h2><dl><div><dt>富達級別</dt><dd>' + fund.share + '</dd></div><div><dt>淨值</dt><dd>' + fund.nav + '<small>' + fund.navDate + '</small></dd></div><div><dt>績效</dt><dd>1Y ' + pct(fund.y1) + ' / 3Y ' + pct(fund.y3) + '<small>' + fund.perfDate + '</small></dd></div><div><dt>競品五指標</dt><dd>' + peerMetricEvidence + '</dd></div></dl><a href="' + fund.source + '" target="_blank" rel="noopener noreferrer">富達績效來源 ↗</a><a class="secondary" href="' + peer.source + '" target="_blank" rel="noopener noreferrer">競品績效來源 ↗</a>' + (hasCompleteMetrics(fund) ? '<a class="secondary" href="' + fund.metrics.basicSource + '" target="_blank" rel="noopener noreferrer">費用資料來源 ↗</a>' : '') + '</section></div>' +
-      '<section id="universe" class="sectionHead"><div><small>PEER UNIVERSE</small><h2>' + cleanName(fund.name) + '競品池</h2></div><span>' + list.length + ' 檔</span></section><div class="peerTable table"><table><thead><tr><th>#</th><th>基金／比較摘要</th><th>可比性</th><th>一年績效</th><th>風險</th><th>費用率</th><th>動作</th></tr></thead><tbody>' + peerRows + '</tbody></table></div><p class="footnote peerAuditNote">資料查核：' + auditDate + '。一年績效為各基金 MoneyDJ 最新資料日的單筆申購累積報酬；風險為年化標準差；費用率為最高管理年費。成立未滿一年的級別改列可得的最長短期績效，不以假值補齊。各列資料日可能不同，請勿把未對齊日期的數字直接解讀為排名。</p><div class="peerGrid peerGridFallback">' + peerCards + '</div></div>';
+      '<section id="sources" class="card evidence"><small>SOURCE AUDIT</small><h2>證據與口徑</h2><dl><div><dt>同級別檢查</dt><dd>' + fund.classBasis + '<small>對比 ' + peer.classBasis + '</small></dd></div><div><dt>富達淨值</dt><dd>' + fund.nav + '<small>' + fund.navDate + '</small></dd></div><div><dt>富達績效</dt><dd>1Y ' + pct(fund.y1) + ' / 3Y ' + pct(fund.y3) + '<small>績效 ' + fund.perfDate + ' · 風險 ' + fund.metrics.riskDate + '</small></dd></div><div><dt>競品五指標</dt><dd>' + peerMetricEvidence + '</dd></div></dl><div class="sourceAuditGrid">' + sourceAuditGroup("FIDELITY",fund.name,fund.metrics) + sourceAuditGroup("PEER",peer.name,peer.metrics) + '</div></section></div>' +
+      '<section id="universe" class="sectionHead"><div><small>PEER UNIVERSE</small><h2>' + cleanName(fund.name) + '同級別競品池</h2></div><span>' + list.length + ' 檔</span></section><div class="peerTable table"><table><thead><tr><th>#</th><th>基金／比較摘要</th><th>級別口徑</th><th>一年績效</th><th>風險</th><th>費用率</th><th>動作</th></tr></thead><tbody>' + peerRows + '</tbody></table></div><p class="footnote peerAuditNote">資料查核：' + auditDate + '。僅保留同策略範圍、同計價幣別、同累積／配息型態且避險狀態可辨識的公開級別。一年績效採 MoneyDJ 單筆申購原幣累積報酬；風險採一年年化標準差；費用率採最高管理年費。每個來源按鈕皆直接開啟該基金資料頁。成立未滿一年的級別不補值。</p><div class="peerGrid peerGridFallback">' + peerCards + '</div></div>';
   }
 
   function fullScript() {
@@ -820,6 +949,29 @@
     return '<section><small>0' + (index + 1) + '</small><h3>' + escapeHtml(item.title) + '</h3><p' + (item.title.indexOf("證據") >= 0 || item.title.indexOf("KPI") >= 0 ? ' class="proofLine"' : '') + '>' + escapeHtml(item.text) + '</p></section>';
   }
 
+  function profileSelect(key, values) {
+    return values.map(function (value) {
+      return '<option value="' + escapeHtml(value) + '"' + (state.clientProfile[key] === value ? ' selected' : '') + '>' + escapeHtml(value || "請選擇") + '</option>';
+    }).join("");
+  }
+
+  function composeClientBrief() {
+    var p = state.clientProfile;
+    var parts = [];
+    if (p.age) parts.push(p.age + " 歲");
+    if (p.persona) parts.push(p.persona);
+    if (p.assets) parts.push("可投資資產 " + p.assets);
+    if (p.holdings) parts.push("既有部位為 " + p.holdings);
+    if (p.goal) parts.push("主要目標是 " + p.goal);
+    if (p.horizon) parts.push("投資期限 " + p.horizon);
+    if (p.liquidity) parts.push("流動性需求：" + p.liquidity);
+    if (p.risk) parts.push("風險承受度：" + p.risk);
+    if (p.experience) parts.push("投資經驗：" + p.experience);
+    if (p.concern) parts.push("主要顧慮：" + p.concern);
+    if (p.notes) parts.push("補充：" + p.notes);
+    return parts.join("，") + "。";
+  }
+
   function renderScript() {
     var fund = currentFund();
     var pack = buildScriptPackage();
@@ -844,7 +996,19 @@
       '<div class="empty"><span>✦</span><h3>等待產生話術</h3><p>基金、客戶文字、主要情境與創意切角會共同改變完整對話。</p></div>';
     return '<div class="page">' + title("CONVERSATION LAB", "話術實驗室", "同一檔基金，面對不同客戶與情境，不應說同一套話。") +
       '<section class="marketNote"><small>LIVE MARKET CONTEXT · ' + market.asOf + '</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達 9/7 市場週報 ↗</a><a href="' + market.secondary + '" target="_blank" rel="noopener noreferrer">2026 全球投資人研究 ↗</a></div></section>' +
-      '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT BRIEF</small><h2>建立客戶情境</h2><label>客戶描述<textarea id="clientText" placeholder="例如：55歲企業主，台股與公司資產高度相關，希望增加海外配置，但怕追高。">' + escapeHtml(state.client) + '</textarea></label><label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>主要情境<select id="scenarioSelect">' + scenarioOptions + '</select></label><small class="fieldInsight"><b>' + escapeHtml(pack.scene.label) + '</b>' + escapeHtml(pack.scene.tension) + '</small><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><small class="fieldInsight modeInsight"><b>' + escapeHtml(state.mode) + '</b>' + escapeHtml(blueprint.tone) + '<em>' + escapeHtml(blueprint.journey) + '</em></small><button id="generateScript">產生專屬話術 →</button><p class="formPromise">每個欄位都會改變論證順序、段落名稱、問題、異議回答與下一步。</p></section>' +
+      '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT INTERVIEW</small><h2>逐欄建立客戶情境</h2><p class="formIntro">請把會影響適合度與說法的條件分開填寫。每一欄都會進入客戶判讀、風險警示與話術改寫。</p><div class="interviewGrid">' +
+      '<label>年齡<input data-profile="age" inputmode="numeric" value="' + escapeHtml(state.clientProfile.age) + '" placeholder="例如 55"></label>' +
+      '<label>客戶身分<select data-profile="persona">' + profileSelect("persona",["","企業主","專業人士","受薪投資人","退休規劃族","其他投資人"]) + '</select></label>' +
+      '<label>可投資資產<input data-profile="assets" value="' + escapeHtml(state.clientProfile.assets) + '" placeholder="例如 3000 萬"></label>' +
+      '<label>投資期限<select data-profile="horizon">' + profileSelect("horizon",["","0–2 年／短期可能使用","3–5 年","五年以上","尚未確認"]) + '</select></label>' +
+      '<label class="wide">目前持有與集中部位<textarea data-profile="holdings" placeholder="例如：台股占七成、公司資產與半導體景氣高度相關">' + escapeHtml(state.clientProfile.holdings) + '</textarea></label>' +
+      '<label>主要目標<select data-profile="goal">' + profileSelect("goal",["","海外分散","長期增值","退休穩健","現金流／配息","提升組合效率"]) + '</select></label>' +
+      '<label>風險承受度<select data-profile="risk">' + profileSelect("risk",["","低風險；不能接受本金明顯下跌","中等；可承受合理波動","高風險；能承受大幅波動","尚未量化"]) + '</select></label>' +
+      '<label>流動性需求<select data-profile="liquidity">' + profileSelect("liquidity",["","高；一年內可能用錢","一般；一年內沒有重大資金用途","低；長期不用這筆錢","尚未確認"]) + '</select></label>' +
+      '<label>投資經驗<select data-profile="experience">' + profileSelect("experience",["","第一次投資／新手","有投資經驗","投資多年","尚未確認"]) + '</select></label>' +
+      '<label class="wide">客戶主要顧慮<select data-profile="concern">' + profileSelect("concern",["","市場估值偏高／怕追高","持股過度集中／需要分散","現金流／配息需求","退休前後／重視下檔","利率方向不明／債券疑慮","現金很多／一直等回檔","長期增值／尋找成長引擎"]) + '</select></label>' +
+      '<label class="wide">業務訪談補充<textarea data-profile="notes" placeholder="請填：客戶原話、不能接受的情況、家庭／公司未來支出、過去投資經驗…">' + escapeHtml(state.clientProfile.notes) + '</textarea></label></div>' +
+      '<label>主推基金<select id="scriptFund">' + fundOptions + '</select></label><label>主要情境<select id="scenarioSelect">' + scenarioOptions + '</select></label><small class="fieldInsight"><b>' + escapeHtml(pack.scene.label) + '</b>' + escapeHtml(pack.scene.tension) + '</small><label>創意切角<select id="modeSelect">' + modeOptions + '</select></label><small class="fieldInsight modeInsight"><b>' + escapeHtml(state.mode) + '</b>' + escapeHtml(blueprint.tone) + '<em>' + escapeHtml(blueprint.journey) + '</em></small><button id="generateScript">產生專屬話術 →</button><p class="formPromise">年齡、資產、持倉、目標、期限、流動性、風險、經驗與顧慮都會實際改變輸出。</p></section>' +
       '<section class="card output ' + (state.generated ? "ready" : "") + '"><div class="cardHead"><div><small>02 / SALES NARRATIVE</small><h2>' + (state.generated ? escapeHtml(state.mode) + '對話稿' : '客製對話框架') + '</h2></div>' + (state.generated ? '<button data-copy="' + escapeHtml(fullScript()) + '">複製全文</button>' : "") + '</div>' + output + '</section></div>' +
       '<section class="objections"><div class="sectionHead"><div><small>OBJECTION HANDLING · ' + escapeHtml(state.mode) + '</small><h2>' + cleanName(fund.name) + '｜' + pack.scene.label + '</h2><p>回答語氣與推進方式也會依切角重寫，不只替換基金名稱。</p></div></div><div>' +
       pack.objections.map(function (item) { return objection(item.q, item.a); }).join("") +
@@ -949,10 +1113,17 @@
       state.generated = false;
       render();
     });
-    var clientText = document.getElementById("clientText");
-    if (clientText) clientText.addEventListener("input", function () {
-      state.client = clientText.value;
-      state.generated = false;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-profile]"), function (field) {
+      field.addEventListener("input", function () {
+        state.clientProfile[field.getAttribute("data-profile")] = field.value;
+        state.client = composeClientBrief();
+        state.generated = false;
+      });
+      field.addEventListener("change", function () {
+        state.clientProfile[field.getAttribute("data-profile")] = field.value;
+        state.client = composeClientBrief();
+        state.generated = false;
+      });
     });
     var scenarioSelect = document.getElementById("scenarioSelect");
     if (scenarioSelect) scenarioSelect.addEventListener("change", function () {
@@ -962,7 +1133,10 @@
     });
     var generate = document.getElementById("generateScript");
     if (generate) generate.addEventListener("click", function () {
-      state.client = document.getElementById("clientText").value;
+      Array.prototype.forEach.call(document.querySelectorAll("[data-profile]"), function (field) {
+        state.clientProfile[field.getAttribute("data-profile")] = field.value;
+      });
+      state.client = composeClientBrief();
       state.generated = true;
       render();
     });
