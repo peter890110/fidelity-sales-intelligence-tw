@@ -1,0 +1,98 @@
+/* Taste polish — deliberate institutional motion and interaction feedback */
+:root{
+  --ease-taste-out:cubic-bezier(.23,1,.32,1);
+  --ease-taste-standard:cubic-bezier(.2,.8,.2,1);
+  --motion-press:150ms;
+  --motion-state:180ms;
+  --focus-ring:#17a7be;
+}
+html{scroll-behavior:smooth}
+
+/* The current section remains visible at a glance, without decorative animation. */
+.compareAnchors a{
+  transition:color var(--motion-state) var(--ease-taste-out),opacity var(--motion-state) var(--ease-taste-out);
+}
+.compareAnchors a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height:3px;
+  background:var(--red);
+  transform:scaleX(0);
+  transform-origin:left center;
+  transition:transform 190ms var(--ease-taste-out);
+}
+.compareAnchors a.active::after{transform:scaleX(1)}
+
+/* Give high-frequency controls crisp feedback; no broad `transition: all`. */
+.compareLead button,
+.sourceGroup a,
+.peerTable button,
+.peerTable td:last-child a,
+.allocationFund>a,
+.selectors select,
+.interviewGrid input,
+.interviewGrid select,
+.interviewGrid textarea{
+  transition:
+    transform var(--motion-press) var(--ease-taste-out),
+    box-shadow var(--motion-state) var(--ease-taste-standard),
+    background-color var(--motion-state) var(--ease-taste-standard),
+    border-color var(--motion-state) var(--ease-taste-standard),
+    color var(--motion-state) var(--ease-taste-standard);
+}
+.compareLead button:active,
+.sourceGroup a:active,
+.peerTable button:active,
+.peerTable td:last-child a:active,
+.allocationFund>a:active{transform:scale(.985)}
+
+:where(button,a,select,input,textarea):focus-visible{
+  outline:2px solid var(--focus-ring);
+  outline-offset:3px;
+}
+
+/* Motion only where a precise pointer can reveal it. */
+@media (hover:hover) and (pointer:fine){
+  .compareAnchors a:hover:not(.active){color:var(--red)}
+  .compareLead button:hover{
+    border-color:var(--red);
+    background:#fff5f7;
+    box-shadow:0 8px 18px rgba(197,24,61,.12);
+    transform:translateY(-1px);
+  }
+  .sourceGroup a:hover{
+    box-shadow:0 7px 16px rgba(0,36,54,.12);
+    transform:translateY(-1px);
+  }
+  .peerTable tbody tr:not(.selected):hover{background:#f7faf9}
+  .peerTable button:hover,.peerTable td:last-child a:hover{color:var(--red)!important}
+  .allocationFund>a:hover{transform:translateY(-1px)}
+  .selectors select:hover,
+  .interviewGrid input:hover,
+  .interviewGrid select:hover,
+  .interviewGrid textarea:hover{border-color:#6a8792}
+}
+
+/* Portfolio bars should settle quickly after a genuine fund-selection change. */
+.allocationTrack i,
+.holdingTrack i{transition:width 260ms var(--ease-taste-out)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .compareAnchors a,
+  .compareAnchors a::after,
+  .compareLead button,
+  .sourceGroup a,
+  .peerTable button,
+  .peerTable td:last-child a,
+  .allocationFund>a,
+  .selectors select,
+  .interviewGrid input,
+  .interviewGrid select,
+  .interviewGrid textarea,
+  .allocationTrack i,
+  .holdingTrack i{transition-duration:.01ms!important}
+}
