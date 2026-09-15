@@ -6,7 +6,7 @@
 .title>span small{color:#9db1ba}
 .compareAnchors{position:sticky;top:130px;z-index:20;margin:0 -4.5vw;padding:0 4.5vw;height:54px;display:flex;align-items:stretch;gap:34px;background:#fff;border-bottom:1px solid var(--rule)}
 .compareAnchors a{display:flex;align-items:center;position:relative;color:var(--ink);font-size:12px;font-weight:800;text-decoration:none}
-.compareAnchors a:first-child:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--red)}
+.compareAnchors a.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--red)}
 #comparison,#metrics,#allocations,#holdings,#sources,#universe{scroll-margin-top:198px}
 .selectors{display:grid;grid-template-columns:1fr 46px 1fr;margin:26px 0 0;padding:24px 28px;border-bottom:0}
 .selectors label{font-size:11px;letter-spacing:.02em}.selectors select{height:52px;font-weight:700}

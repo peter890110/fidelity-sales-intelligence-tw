@@ -1278,6 +1278,17 @@
       '<main><header><span class="mobileBrand">Fidelity Sales Intelligence</span><span>INSTITUTIONAL SALES DESK</span><b>TAIWAN · 繁中</b></header>' + view() +
       '<footer>僅供內部業務參考，非基金排名或投資建議。基金有價格波動及本金損失風險；過去績效不代表未來。使用前請依最新公開說明書與法遵規範確認。</footer></main></div><div id="toast" class="toast" hidden>已複製到剪貼簿</div>';
     bind();
+    syncCompareAnchors();
+  }
+
+  function syncCompareAnchors() {
+    var activeHash = window.location.hash || "#comparison";
+    Array.prototype.forEach.call(document.querySelectorAll(".compareAnchors a"), function (anchor) {
+      var active = anchor.getAttribute("href") === activeHash;
+      anchor.classList.toggle("active", active);
+      if (active) anchor.setAttribute("aria-current", "page");
+      else anchor.removeAttribute("aria-current");
+    });
   }
 
   function bind() {
@@ -1393,6 +1404,8 @@
       window.setTimeout(function () { toast.hidden = true; }, 1500);
     }
   }
+
+  window.addEventListener("hashchange", syncCompareAnchors);
 
   restoreStateFromUrl();
   if (state.page === "home") advanceFeaturedFund();
