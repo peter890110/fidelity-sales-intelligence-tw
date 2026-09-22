@@ -96,3 +96,25 @@ html{scroll-behavior:smooth}
   .allocationTrack i,
   .holdingTrack i{transition-duration:.01ms!important}
 }
+
+/* Conversation output: make the selected client conditions visible before the script. */
+.tailoringPlan{
+  margin:18px 0;
+  padding:18px;
+  border:1px solid #d6e1e4;
+  border-top:4px solid var(--red);
+  background:#f7faf9;
+}
+.tailoringPlan header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:14px}
+.tailoringPlan small{color:var(--red);font-weight:800;letter-spacing:.13em}
+.tailoringPlan h3{margin:0;color:#002436;font:700 20px/1.25 var(--serif)}
+.tailoringPlan>div{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tailoringPlan article{padding:13px 14px;border-left:3px solid #1aa7b9;background:#fff}
+.tailoringPlan article small{display:block;margin-bottom:6px;color:#52717b;font-size:10px;letter-spacing:.08em}
+.tailoringPlan article p{margin:0;color:#17394a;font:500 13px/1.6 var(--sans)}
+@media (max-width:720px){
+  .tailoringPlan{padding:15px}
+  .tailoringPlan header{display:block}
+  .tailoringPlan h3{margin-top:7px;font-size:18px}
+  .tailoringPlan>div{grid-template-columns:1fr}
+}

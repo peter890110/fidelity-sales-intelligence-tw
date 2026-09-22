@@ -300,7 +300,7 @@
     var requestedFund = params.get("fund");
     var requestedPeer = params.get("peer");
     var validFund = funds.some(function (fund) { return fund.id === requestedFund; });
-    if (params.get("page") === "compare") state.page = "compare";
+    if (["home", "compare", "script", "library"].indexOf(params.get("page")) >= 0) state.page = params.get("page");
     if (validFund) state.fundId = requestedFund;
     if (requestedPeer && (peers[state.fundId] || []).some(function (peer) { return peer.name === requestedPeer; })) {
       state.peerName = requestedPeer;
@@ -540,6 +540,7 @@
   function analyzeClient(text, fundId, selectedScenario) {
     var source = String(text || "").replace(/\s+/g, " ").trim();
     var input = state.clientProfile || {};
+    var clientName = String(input.clientName || "").trim();
     var ageMatch = source.match(/(\d{2})(?:\s*[–-]\s*\d{2})?\s*歲/);
     var ageLabel = input.age || (ageMatch ? ageMatch[0].replace(/\s*歲/, "") : "");
     var age = ageLabel ? Number(String(ageLabel).match(/\d{2}/)[0]) : null;
@@ -557,7 +558,8 @@
     if (includesAny(source, ["美股","S&P","納斯達克"])) holdings.push("美股");
     if (includesAny(source, ["現金","定存"])) holdings.push("現金");
     if (includesAny(source, ["債券","債"])) holdings.push("債券");
-    var holding = holdings.length ? holdings.join("＋") : "既有部位待確認";
+    var statedHoldings = String(input.holdings || "").trim();
+    var holding = statedHoldings || (holdings.length ? holdings.join("＋") : "既有部位待確認");
     var goals = [];
     if (includesAny(source, ["配息","現金流","收益","領息"])) goals.push("現金流");
     if (includesAny(source, ["退休","保本","穩健"])) goals.push("退休穩健");
@@ -575,6 +577,7 @@
       includesAny(source, ["積極","高風險","能承受","波動沒關係"]) ? "高" : "中／待確認";
     var experience = input.experience ? (input.experience.indexOf("第一次") === 0 ? "初次投資" : input.experience.indexOf("尚未") === 0 ? "待確認" : "有經驗") : includesAny(source, ["第一次","新手","沒買過"]) ? "初次投資" :
       includesAny(source, ["投資多年","有經驗","長期投資"]) ? "有經驗" : "待確認";
+    var concern = input.concern || "尚未明確說出顧慮";
     var scenario = selectedScenario;
     if (!scenario || scenario === "auto") {
       if (includesAny(source, ["高點","估值","太高","追高","泡沫"])) scenario = "valuation";
@@ -615,16 +618,17 @@
       {label:"核心目標",value:goal},
       {label:"投資理念",value:philosophy},
       {label:"溝通偏好",value:decisionStyle},
+      {label:"主要顧慮",value:concern},
       {label:"可用期限",value:horizon},
       {label:"流動性需求",value:liquidity},
       {label:"風險承受度",value:riskTolerance},
       {label:"投資經驗",value:experience}
     ];
     return {
-      source:source, age:age, ageLabel:ageLabel, amount:amount, investAmount:investAmount, lifeStage:lifeStage, persona:persona, holdings:holdings, holding:holding,
+      source:source, clientName:clientName, age:age, ageLabel:ageLabel, amount:amount, investAmount:investAmount, lifeStage:lifeStage, persona:persona, holdings:holdings, holding:holding,
       goal:goal, scenario:scenario, horizon:horizon, liquidity:liquidity, riskTolerance:riskTolerance,
-      experience:experience, philosophy:philosophy, decisionStyle:decisionStyle, alert:alert, signals:signals,
-      summary:(ageLabel ? formatAge(ageLabel) + " · " : "") + persona + "｜" + lifeStage + "｜本次 " + investAmount + "｜既有 " + holding + "｜期待 " + goal + "｜" + philosophy + "｜" + scenarioDefinitions[scenario].label
+      experience:experience, philosophy:philosophy, decisionStyle:decisionStyle, concern:concern, alert:alert, signals:signals,
+      summary:(clientName ? clientName + "｜" : "") + (ageLabel ? formatAge(ageLabel) + " · " : "") + persona + "｜" + lifeStage + "｜本次 " + investAmount + "｜既有 " + holding + "｜期待 " + goal + "｜顧慮 " + concern + "｜" + scenarioDefinitions[scenario].label
     };
   }
 
@@ -713,6 +717,19 @@
       client.decisionStyle.indexOf("風險") >= 0 ?
       "第一分鐘先說不適合條件與最差情境，取得信任後才談機會。" :
       "用追問與確認句共同推演，讓客戶自己說出優先順序，不搶著說服。";
+    var concernDecision = client.concern.indexOf("追高") >= 0 ?
+      "不把焦點放在預測回檔；改用分批、持有期限與買進後怎麼檢視，降低一次決策的壓力。" :
+      client.concern.indexOf("集中") >= 0 ?
+      "先把既有部位攤開比較，確認新增部位到底降低還是加重同一個風險來源。" :
+      client.concern.indexOf("現金流") >= 0 || client.concern.indexOf("配息") >= 0 ?
+      "先確認實際配息級別與現金需求；配息不是報酬保證，也不替代資金用途規劃。" :
+      client.concern.indexOf("退休") >= 0 || client.concern.indexOf("下檔") >= 0 ?
+      "先保留生活與醫療等必要支出，再只用不影響提領計畫的長期資金討論成長部位。" :
+      client.concern.indexOf("利率") >= 0 ?
+      "不賭單一利率方向；用存續期間、信用風險與資產角色說明可能的波動來源。" :
+      client.concern.indexOf("現金") >= 0 || client.concern.indexOf("回檔") >= 0 ?
+      "把等待改成有期限的計畫：先保留現金緩衝，再把可承擔資金拆成明確的日期與金額。" :
+      "先確認客戶最不想發生的結果，讓產品角色回應具體顧慮，而不是套用市場口號。";
     return [
       "生命階段｜" + stageDecision,
       "客戶身分｜" + personaDecision,
@@ -725,7 +742,8 @@
       "資金期限｜" + horizonDecision,
       "流動性｜" + liquidityDecision,
       "風險承受度｜" + riskDecision,
-      "投資經驗｜" + experienceDecision
+      "投資經驗｜" + experienceDecision,
+      "本次顧慮｜" + concernDecision
     ];
   }
 
@@ -807,6 +825,7 @@
   function buildSpokenConversation(pack) {
     var c = pack.client;
     var fundName = cleanName(pack.fund.name);
+    var salutation = c.clientName ? c.clientName + "，" : "";
     var stage = c.ageLabel ? formatAge(c.ageLabel) + "、正處於" + c.lifeStage : "目前人生階段還需要再確認";
     var styleLead = c.decisionStyle.indexOf("數字") >= 0 ?
       "我先不講漂亮故事，先把數字、風險和資料日期攤開來看。" :
@@ -846,12 +865,34 @@
       "以您目前偏低的風險承受度，我不會直接往下推。今天先把可接受損失換成具體金額；如果和 " + pack.fund.risk + " 對不上，我們就換方案。" :
       "如果方向合理，今天先做一個小決定：把資金用途、可接受回撤和下一個檢視日期寫下來。三個條件都過，再談是否納入。";
     return [
-      {label:"先讓客戶放下戒心",text:styleLead},
-      {label:"說出你真的有聽懂",text:"我聽到的是：您目前 " + stage + "，希望做到「" + c.goal + "」，目前主要部位是" + c.holding + "。" + philosophyLine},
+      {label:"先讓客戶放下戒心",text:salutation + styleLead},
+      {label:"說出你真的有聽懂",text:"我聽到的是：您目前 " + stage + "，希望做到「" + c.goal + "」，目前主要部位是" + c.holding + "；您現在最在意的是「" + c.concern + "」。" + philosophyLine},
       {label:state.mode === "蘇格拉底提問" ? "蘇格拉底式追問" : state.mode === "董事會精準" ? "董事會式決策題" : "關鍵診斷問題",text:firstQuestion},
       {label:"把基金放回組合",text:productLine},
       {label:"把金額講清楚",text:amountLine},
       {label:"證據與收尾",text:proofLine + " " + closeLine}
+    ];
+  }
+
+  function personalizedPlan(pack) {
+    var c = pack.client;
+    var fund = pack.fund;
+    var priority = c.concern.indexOf("追高") >= 0 ? "先處理『怕買在高點』，不把會談變成猜行情。" :
+      c.concern.indexOf("集中") >= 0 ? "先確認既有部位是否已經集中，再談新增基金。" :
+      c.concern.indexOf("現金流") >= 0 || c.concern.indexOf("配息") >= 0 ? "先分清楚現金流需求與累積級別的角色，避免把配息當成保證。" :
+      c.concern.indexOf("退休") >= 0 || c.concern.indexOf("下檔") >= 0 ? "先守住必要支出與退休提領，再判斷可承受的投資波動。" :
+      "先把客戶的顧慮翻成可核對的條件，再決定基金是否適合進入組合。";
+    var suitability = (c.horizon === "0–2 年" || c.liquidity === "高" || (c.riskTolerance === "低" && (fund.risk === "RR4" || fund.risk === "RR5"))) ?
+      "暫不主張直接投入。先確認短期用途、可承受損失與風險屬性；條件不相容時，這檔基金不應被推進。" :
+      "可進入比較，但只在確認資金用途、既有重疊與可承受回撤後，才討論金額與分批方式。";
+    var action = c.investAmount === "尚未決定" ?
+      "會後先確認可用資金與短期支出；下次再把金額拆成一次或分批的執行方案。" :
+      "以「" + c.investAmount + "」為討論起點；先扣掉一年內用途，再決定是否分批與每次檢視日期。";
+    return [
+      {label:"這次優先處理",value:priority},
+      {label:"產品適合度結論",value:suitability},
+      {label:"本次會談的證據",value:"以 " + fund.share + " 的公開資料、既有持倉與客戶選擇的「" + c.decisionStyle + "」方式說明；不以單期績效取代適合度。"},
+      {label:"下一個可執行動作",value:action}
     ];
   }
 
@@ -881,6 +922,7 @@
     };
     pack.adjustments = clientAdjustments(client, fund);
     pack.spoken = buildSpokenConversation(pack);
+    pack.personalPlan = personalizedPlan(pack);
     var baseObjections = [
       {q:scene.objectionQ,a:scene.objectionA + " 對" + cleanName(fund.name) + "而言，核心檢驗是能否完成「" + profile.identity + "」的組合任務。"},
       {q:"為什麼不直接買 ETF？",a:profile.etf + " 這不是主動一定優於被動，而是比較費用後是否取得需要的配置差異。"},
@@ -1173,6 +1215,7 @@
   function composeClientBrief() {
     var p = state.clientProfile;
     var parts = [];
+    if (p.clientName) parts.push("客戶稱呼 " + p.clientName);
     if (p.age) parts.push(formatAge(p.age));
     if (p.persona) parts.push(p.persona);
     if (p.assets) parts.push("可投資資產 " + p.assets);
@@ -1204,6 +1247,7 @@
     }).join("");
     var signalGrid = pack.client.signals.map(renderSignal).join("");
     var adjustmentList = pack.adjustments.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join("");
+    var planCards = pack.personalPlan.map(function (item) { return '<article><small>' + escapeHtml(item.label) + '</small><p>' + escapeHtml(item.value) + '</p></article>'; }).join("");
     var narrativeSections = pack.sections.map(renderNarrativeSection).join("");
     var spokenLines = pack.spoken.map(function (item, index) {
       return '<div class="spokenLine"><span>' + String(index + 1).padStart(2, "0") + '</span><div><small>' + escapeHtml(item.label) + '</small><p>「' + escapeHtml(item.text) + '」</p></div></div>';
@@ -1211,6 +1255,7 @@
     var output = state.generated ?
       '<div class="narrativeBlueprint"><div><small>SELECTED BLUEPRINT</small><b>' + escapeHtml(state.mode) + '</b></div><span>' + escapeHtml(blueprint.journey) + '</span></div>' +
       '<div class="clientRead"><small>CLIENT SIGNALS · 實際改寫依據</small><b>' + escapeHtml(pack.client.summary) + '</b><div class="signalGrid">' + signalGrid + '</div></div>' +
+      '<section class="tailoringPlan"><header><small>CLIENT-SPECIFIC DECISION PLAN</small><h3>這不是通用模板：本次話術的四個客製化決策</h3></header><div>' + planCards + '</div></section>' +
       '<div class="personalization"><small>WHY THIS VERSION IS DIFFERENT</small><h3>因這位客戶的條件，話術已作以下調整</h3><ol>' + adjustmentList + '</ol></div>' +
       '<section class="spokenScript"><header><div><small>READY TO SAY · 可直接說出口</small><h3>依這位客戶重寫的口語對話</h3></div><span>' + escapeHtml(pack.client.decisionStyle) + '</span></header>' + spokenLines + '</section>' +
       '<blockquote>「' + escapeHtml(pack.opening) + '」</blockquote>' +
@@ -1220,6 +1265,7 @@
     return '<div class="page">' + title("CONVERSATION LAB", "話術實驗室", "同一檔基金，面對不同客戶與情境，不應說同一套話。") +
       '<section class="marketNote"><small>LIVE MARKET CONTEXT · ' + market.asOf + '</small><h2>' + market.title + '</h2><p>' + market.body + '</p><div><a href="' + market.source + '" target="_blank" rel="noopener noreferrer">富達 9/7 市場週報 ↗</a><a href="' + market.secondary + '" target="_blank" rel="noopener noreferrer">2026 全球投資人研究 ↗</a></div></section>' +
       '<div class="scriptGrid"><section class="card form"><small>01 / CLIENT INTERVIEW</small><h2>逐欄建立客戶情境</h2><p class="formIntro">請把會影響適合度與說法的條件分開填寫。每一欄都會進入客戶判讀、風險警示與話術改寫。</p><div class="interviewGrid">' +
+      '<label>客戶稱呼（選填）<input data-profile="clientName" value="' + escapeHtml(state.clientProfile.clientName || "") + '" placeholder="例如：王先生、陳姐"></label>' +
       '<label>客戶年齡<select data-profile="age">' + profileSelect("age",["","25–34","35–44","45–54","55–64","65 以上"]) + '</select></label>' +
       '<label>客戶身分<select data-profile="persona">' + profileSelect("persona",["","企業主","專業人士","受薪投資人","退休規劃族","其他投資人"]) + '</select></label>' +
       '<label>可投資資產規模<select data-profile="assets">' + profileSelect("assets",["","500 萬以下","500–1,500 萬","1,500–3,000 萬","3,000–5,000 萬","5,000 萬以上","尚未確認"]) + '</select></label>' +
