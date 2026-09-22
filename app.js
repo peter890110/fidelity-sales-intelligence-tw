@@ -881,6 +881,7 @@
       c.concern.indexOf("集中") >= 0 ? "先確認既有部位是否已經集中，再談新增基金。" :
       c.concern.indexOf("現金流") >= 0 || c.concern.indexOf("配息") >= 0 ? "先分清楚現金流需求與累積級別的角色，避免把配息當成保證。" :
       c.concern.indexOf("退休") >= 0 || c.concern.indexOf("下檔") >= 0 ? "先守住必要支出與退休提領，再判斷可承受的投資波動。" :
+      c.concern.indexOf("利率") >= 0 ? "不猜利率何時轉向；先把債券的存續期間、信用風險與它在組合裡要解決的問題說清楚。" :
       "先把客戶的顧慮翻成可核對的條件，再決定基金是否適合進入組合。";
     var suitability = (c.horizon === "0–2 年" || c.liquidity === "高" || (c.riskTolerance === "低" && (fund.risk === "RR4" || fund.risk === "RR5"))) ?
       "暫不主張直接投入。先確認短期用途、可承受損失與風險屬性；條件不相容時，這檔基金不應被推進。" :
